@@ -1,0 +1,590 @@
+/**
+ * Animações dos Agentes - Agente Cidadão v3
+ * Animações dinâmicas para simular "bonecos em movimento trabalhando"
+ */
+
+/* ===================================
+   KEYFRAMES - ANIMAÇÕES BASE
+   =================================== */
+
+/* Pulse - Pulsação suave para agente trabalhando */
+@keyframes agent-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+/* Float - Movimento vertical suave (flutuação) */
+@keyframes agent-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Bounce - Entrada com "salto" */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(50px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) translateY(-10px);
+  }
+  70% {
+    transform: scale(0.95) translateY(5px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Shake - Tremor para erro */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+  20%, 40%, 60%, 80% { transform: translateX(8px); }
+}
+
+/* Glow Pulse - Brilho pulsante ao redor do agente */
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+  }
+}
+
+/* Rotate - Rotação completa */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Wiggle - Balanço lateral (como se estivesse trabalhando) */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+/* Breathing - Respiração suave */
+@keyframes breathing {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Fade In Up - Aparecer deslizando de baixo */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade Out Down - Desaparecer deslizando para baixo */
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* Scale In - Crescer aparecendo */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Sparkle - Brilho de partículas */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+/* Working - Movimento de trabalho (combinado) */
+@keyframes working {
+  0% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-5px) scale(1.02) rotate(2deg); }
+  50% { transform: translateY(0) scale(1.05); }
+  75% { transform: translateY(-5px) scale(1.02) rotate(-2deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* ===================================
+   CLASSES DE ESTADO DOS AGENTES
+   =================================== */
+
+/* Estado: Idle (Aguardando) */
+.agent-card.idle {
+  opacity: 0.4;
+  transform: scale(0.9);
+  transition: all 0.5s ease;
+}
+
+.agent-card.idle .agent-avatar {
+  animation: breathing 4s ease-in-out infinite;
+}
+
+.agent-card.idle .agent-glow {
+  opacity: 0;
+}
+
+/* Estado: Working (Trabalhando) */
+.agent-card.working {
+  opacity: 1;
+  transform: scale(1.05);
+  animation: agent-float 2s ease-in-out infinite;
+}
+
+.agent-card.working .agent-avatar {
+  animation: working 1.5s ease-in-out infinite;
+}
+
+.agent-card.working .agent-glow {
+  animation: glow-pulse 1.5s ease-in-out infinite;
+}
+
+.agent-card.working .agent-badge {
+  animation: pulse-border 1s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-width: 2px;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  50% {
+    border-width: 3px;
+    box-shadow: 0 0 15px currentColor;
+  }
+}
+
+/* Estado: Completed (Concluído) */
+.agent-card.completed {
+  opacity: 1;
+  transform: scale(1);
+  animation: bounce-in 0.6s ease;
+}
+
+.agent-card.completed .agent-avatar {
+  animation: none;
+}
+
+.agent-card.completed .agent-glow {
+  opacity: 0.3;
+  animation: none;
+}
+
+.agent-card.completed .agent-badge {
+  background-color: var(--color-success);
+  animation: scaleIn 0.3s ease;
+}
+
+/* Estado: Error (Erro) */
+.agent-card.error {
+  opacity: 0.7;
+  animation: shake 0.5s ease;
+}
+
+.agent-card.error .agent-avatar {
+  filter: grayscale(0.5);
+}
+
+.agent-card.error .agent-badge {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+  color: white;
+}
+
+.agent-card.error .agent-glow {
+  background-color: var(--color-error);
+  opacity: 0.2;
+}
+
+/* ===================================
+   ANIMAÇÕES ESPECÍFICAS POR AGENTE
+   =================================== */
+
+/* Orquestrador - Movimento de "condução" */
+.agent-card.orchestrator.working .agent-avatar {
+  animation: conducting 1.5s ease-in-out infinite;
+}
+
+@keyframes conducting {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(5deg) translateY(-5px); }
+  50% { transform: rotate(0deg) translateY(0); }
+  75% { transform: rotate(-5deg) translateY(-5px); }
+}
+
+/* Legislativo - Movimento de "virando páginas" */
+.agent-card.legislative.working .agent-avatar {
+  animation: reading 2s ease-in-out infinite;
+}
+
+@keyframes reading {
+  0%, 100% { transform: rotateY(0deg); }
+  25% { transform: rotateY(10deg) translateX(3px); }
+  50% { transform: rotateY(0deg); }
+  75% { transform: rotateY(-10deg) translateX(-3px); }
+}
+
+/* Político - Movimento de "discurso" */
+.agent-card.political.working .agent-avatar {
+  animation: speaking 1.2s ease-in-out infinite;
+}
+
+@keyframes speaking {
+  0%, 100% { transform: scale(1); }
+  33% { transform: scale(1.05) translateY(-3px); }
+  66% { transform: scale(0.98) translateY(3px); }
+}
+
+/* Fiscal - Movimento de "contando/analisando" */
+.agent-card.fiscal.working .agent-avatar {
+  animation: calculating 1s ease-in-out infinite;
+}
+
+@keyframes calculating {
+  0%, 100% { transform: translateX(0) scale(1); }
+  25% { transform: translateX(-3px) scale(1.02); }
+  50% { transform: translateX(3px) scale(1.05); }
+  75% { transform: translateX(-3px) scale(1.02); }
+}
+
+/* Sintetizador - Movimento de "escrevendo" */
+.agent-card.synthesizer.working .agent-avatar {
+  animation: writing 1.3s ease-in-out infinite;
+}
+
+@keyframes writing {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  33% { transform: translateX(5px) rotate(2deg); }
+  66% { transform: translateX(-5px) rotate(-2deg); }
+}
+
+/* ===================================
+   CORES DE GLOW POR AGENTE
+   =================================== */
+
+.agent-card.orchestrator .agent-glow {
+  background: radial-gradient(circle, var(--agent-orchestrator) 0%, transparent 70%);
+}
+
+.agent-card.legislative .agent-glow {
+  background: radial-gradient(circle, var(--agent-legislative) 0%, transparent 70%);
+}
+
+.agent-card.political .agent-glow {
+  background: radial-gradient(circle, var(--agent-political) 0%, transparent 70%);
+}
+
+.agent-card.fiscal .agent-glow {
+  background: radial-gradient(circle, var(--agent-fiscal) 0%, transparent 70%);
+}
+
+.agent-card.synthesizer .agent-glow {
+  background: radial-gradient(circle, var(--agent-synthesizer) 0%, transparent 70%);
+}
+
+/* ===================================
+   BADGES DOS AGENTES
+   =================================== */
+
+.agent-badge.orchestrator {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: var(--agent-orchestrator);
+  color: var(--agent-orchestrator);
+}
+
+.agent-badge.legislative {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: var(--agent-legislative);
+  color: var(--agent-legislative);
+}
+
+.agent-badge.political {
+  background-color: rgba(139, 92, 246, 0.1);
+  border-color: var(--agent-political);
+  color: var(--agent-political);
+}
+
+.agent-badge.fiscal {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: var(--agent-fiscal);
+  color: var(--agent-fiscal);
+}
+
+.agent-badge.synthesizer {
+  background-color: rgba(236, 72, 153, 0.1);
+  border-color: var(--agent-synthesizer);
+  color: var(--agent-synthesizer);
+}
+
+/* ===================================
+   PARTÍCULAS / SPARKLES (opcional)
+   =================================== */
+
+.agent-card.working .sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: currentColor;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.agent-card.working .sparkle:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.agent-card.working .sparkle:nth-child(2) {
+  top: 30%;
+  right: 15%;
+  animation-delay: 0.5s;
+}
+
+.agent-card.working .sparkle:nth-child(3) {
+  bottom: 20%;
+  left: 30%;
+  animation-delay: 1s;
+}
+
+/* ===================================
+   ANIMAÇÕES DO CHAT
+   =================================== */
+
+.chat-message {
+  animation: fadeInUp 0.4s ease;
+}
+
+.chat-message.user {
+  animation: fadeInUp 0.3s ease;
+}
+
+.chat-typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: var(--spacing-md);
+}
+
+.chat-typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-text-light);
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.chat-typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.chat-typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* ===================================
+   MICRO-INTERAÇÕES
+   =================================== */
+
+/* Hover nos botões de exemplo */
+.example-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.example-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  opacity: 0.1;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.example-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Pulse no botão de enviar quando habilitado */
+.chat-submit.pulse {
+  animation: button-pulse 2s ease-in-out infinite;
+}
+
+@keyframes button-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(0, 131, 92, 0.4);
+  }
+}
+
+/* Scroll suave do chat */
+.chat-messages {
+  scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background-color: var(--color-bg-alt);
+  border-radius: var(--radius-full);
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-dark);
+  border-radius: var(--radius-full);
+  transition: background-color 0.2s ease;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary);
+}
+
+/* ===================================
+   TRANSIÇÕES DE PÁGINA
+   =================================== */
+
+.page-enter {
+  animation: pageEnter 0.5s ease;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   LOADING STATES
+   =================================== */
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-bg-alt);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-alt) 25%,
+    var(--color-bg-dark) 50%,
+    var(--color-bg-alt) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===================================
+   ACESSIBILIDADE - PREFERS REDUCED MOTION
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .agent-card.working {
+    animation: none;
+  }
+
+  .agent-card.working .agent-avatar {
+    animation: none;
+  }
+
+  .agent-card.working .agent-glow {
+    animation: none;
+  }
+}
+
+/* ===================================
+   RESPONSIVE ANIMATIONS
+   =================================== */
+
+@media (max-width: 768px) {
+  .agent-card.working {
+    transform: scale(1.02);
+  }
+
+  .agent-float {
+    animation-duration: 3s;
+  }
+}
