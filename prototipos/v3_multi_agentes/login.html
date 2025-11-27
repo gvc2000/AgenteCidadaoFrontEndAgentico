@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Agente Cidadão</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+        }
+
+        .login-card {
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-3xl);
+            max-width: 450px;
+            width: 100%;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .login-header h1 {
+            color: var(--color-primary-dark);
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-3xl);
+        }
+
+        .login-header p {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            margin-bottom: 0;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .form-group label {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text);
+        }
+
+        .form-group input {
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            font-family: var(--font-family);
+            transition: all var(--transition-base);
+            background-color: var(--color-bg-alt);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 131, 92, 0.1);
+            background-color: white;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .form-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-checkbox label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .login-submit {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+            color: white;
+            border: none;
+            padding: var(--spacing-md) var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            margin-top: var(--spacing-sm);
+        }
+
+        .login-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-submit:active {
+            transform: translateY(0);
+        }
+
+        .login-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-md);
+            font-size: var(--font-size-sm);
+        }
+
+        .login-links a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: color var(--transition-base);
+        }
+
+        .login-links a:hover {
+            color: var(--color-primary-dark);
+            text-decoration: underline;
+        }
+
+        .back-to-chat {
+            text-align: center;
+            margin-top: var(--spacing-xl);
+            padding-top: var(--spacing-xl);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .back-to-chat a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            transition: color var(--transition-base);
+        }
+
+        .back-to-chat a:hover {
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: var(--spacing-xl);
+            }
+
+            .login-header h1 {
+                font-size: var(--font-size-2xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Simples -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <div class="header-logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a3 3 0 0 0-3 3v1m6-4a3 3 0 0 1 3 3v1m-9 8h9m-9 4h9"/>
+                        <path d="M6 18h.01M18 18h.01"/>
+                        <rect width="20" height="14" x="2" y="7" rx="2"/>
+                    </svg>
+                </div>
+                <div class="header-logo-text">
+                    <h1 data-i18n="header.title">Agente Cidadão</h1>
+                    <p data-i18n="header.subtitle">Transparência Legislativa com IA</p>
+                </div>
+            </div>
+
+            <nav class="header-nav">
+                <div class="language-selector">
+                    <button id="btn-pt" onclick="window.i18n.setLanguage('pt-br')" class="active">PT</button>
+                    <button id="btn-es" onclick="window.i18n.setLanguage('es')">ES</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Container de Login -->
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Header do Card -->
+            <div class="login-header">
+                <h1 data-i18n="login.title">Área Administrativa</h1>
+                <p data-i18n="login.subtitle">Faça login para acessar o painel de controle</p>
+            </div>
+
+            <!-- Formulário -->
+            <form id="login-form" class="login-form">
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email" data-i18n="login.email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="admin@camara.leg.br"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+
+                <!-- Senha -->
+                <div class="form-group">
+                    <label for="password" data-i18n="login.password">Senha</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="••••••••"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <!-- Lembrar-me -->
+                <div class="form-checkbox">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember" data-i18n="login.remember">Lembrar-me</label>
+                </div>
+
+                <!-- Botão Submit -->
+                <button type="submit" class="login-submit" data-i18n="login.button">
+                    Entrar no Sistema
+                </button>
+
+                <!-- Links -->
+                <div class="login-links">
+                    <a href="#" data-i18n="login.forgot">Esqueci minha senha</a>
+                </div>
+            </form>
+
+            <!-- Voltar ao Chat -->
+            <div class="back-to-chat">
+                <a href="index.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                    <span data-i18n="login.backtochat">Voltar ao Chat</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/i18n.js"></script>
+
+    <script>
+        // Validação simples do formulário
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Validação mockada
+            if (email && password) {
+                alert('🔐 Login mockado!\n\nEm produção, aqui seria feita a autenticação via Supabase Auth.\n\nRedirecionando para admin...');
+                window.location.href = 'admin.html';
+            } else {
+                alert('❌ Por favor, preencha todos os campos.');
+            }
+        });
+
+        // Esqueci minha senha
+        document.querySelector('.login-links a').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('📧 Em produção, um email de recuperação seria enviado via Supabase Auth.');
+        });
+    </script>
+</body>
+</html>
