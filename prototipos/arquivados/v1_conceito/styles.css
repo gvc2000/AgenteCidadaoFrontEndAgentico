@@ -1,0 +1,71 @@
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1e293b; 
+}
+::-webkit-scrollbar-thumb {
+    background: #475569; 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b; 
+}
+
+/* Agent Animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.agent-card.active {
+    opacity: 1;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+}
+
+.agent-card.active .agent-img {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Specific Agent Effects (when active) */
+#agent-orchestrator.active .agent-img {
+    animation: float 3s ease-in-out infinite, pulse-glow 2s infinite;
+}
+
+#agent-legislative.active .agent-img {
+    animation: float 3s ease-in-out infinite;
+}
+
+#agent-political.active .agent-img {
+    animation: float 3s ease-in-out infinite;
+}
+
+#agent-fiscal.active .agent-img {
+    animation: float 3s ease-in-out infinite;
+}
+
+#agent-synthesizer.active .agent-img {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5)); }
+    50% { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.8)); }
+}
+
+.animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Chat Message Styles */
+.message-enter {
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
