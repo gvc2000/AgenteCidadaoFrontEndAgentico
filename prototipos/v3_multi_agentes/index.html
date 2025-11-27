@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agente Cidadão - Acesso Inteligente aos Dados Públicos com Inteligência Artificial">
+    <meta name="keywords" content="transparência, legislativo, câmara dos deputados, dados abertos, IA">
+    <title>Agente Cidadão - Transparência Legislativa com IA</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <div class="header-logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a3 3 0 0 0-3 3v1m6-4a3 3 0 0 1 3 3v1m-9 8h9m-9 4h9"/>
+                        <path d="M6 18h.01M18 18h.01"/>
+                        <rect width="20" height="14" x="2" y="7" rx="2"/>
+                    </svg>
+                </div>
+                <div class="header-logo-text">
+                    <h1 data-i18n="header.title">Agente Cidadão</h1>
+                    <p data-i18n="header.subtitle">Transparência Legislativa com IA</p>
+                </div>
+            </div>
+
+            <nav class="header-nav">
+                <a href="#chat" data-i18n="nav.chat">Chat</a>
+                <a href="admin.html" data-i18n="nav.admin">Administração</a>
+
+                <!-- Seletor de Idioma -->
+                <div class="language-selector">
+                    <button id="btn-pt" onclick="window.i18n.setLanguage('pt-br')" class="active">PT</button>
+                    <button id="btn-es" onclick="window.i18n.setLanguage('es')">ES</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTAINER ===== -->
+    <main class="main-container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2 data-i18n="hero.title">Acesso Inteligente aos Dados Públicos</h2>
+            <p data-i18n="hero.subtitle">Acompanhe proposições, fiscalize gastos e entenda a política com a ajuda de nossa equipe de agentes especializados</p>
+        </section>
+
+        <!-- Agent Stage (Palco dos Agentes) -->
+        <section id="agent-stage" class="agent-stage hidden">
+            <div class="agents-container">
+                <!-- Agente Orquestrador -->
+                <div id="agent-orchestrator" class="agent-card orchestrator idle">
+                    <div class="agent-avatar">
+                        <div class="agent-glow"></div>
+                        <img src="assets/agent_orchestrator.png" alt="Orquestrador">
+                    </div>
+                    <div class="agent-badge orchestrator">
+                        <span class="badge-icon"></span>
+                        <span class="badge-text" data-i18n="agent.orchestrator">Orquestrador</span>
+                    </div>
+                    <p class="agent-message" data-i18n="status.waiting">Aguardando tarefas...</p>
+                </div>
+
+                <!-- Agente Legislativo -->
+                <div id="agent-legislative" class="agent-card legislative idle">
+                    <div class="agent-avatar">
+                        <div class="agent-glow"></div>
+                        <img src="assets/agent_legislative.png" alt="Legislativo">
+                    </div>
+                    <div class="agent-badge legislative">
+                        <span class="badge-icon"></span>
+                        <span class="badge-text" data-i18n="agent.legislative">Legislativo</span>
+                    </div>
+                    <p class="agent-message" data-i18n="status.waiting">Aguardando tarefas...</p>
+                </div>
+
+                <!-- Agente Político -->
+                <div id="agent-political" class="agent-card political idle">
+                    <div class="agent-avatar">
+                        <div class="agent-glow"></div>
+                        <img src="assets/agent_political.png" alt="Político">
+                    </div>
+                    <div class="agent-badge political">
+                        <span class="badge-icon"></span>
+                        <span class="badge-text" data-i18n="agent.political">Político</span>
+                    </div>
+                    <p class="agent-message" data-i18n="status.waiting">Aguardando tarefas...</p>
+                </div>
+
+                <!-- Agente Fiscal -->
+                <div id="agent-fiscal" class="agent-card fiscal idle">
+                    <div class="agent-avatar">
+                        <div class="agent-glow"></div>
+                        <img src="assets/agent_fiscal.png" alt="Fiscal">
+                    </div>
+                    <div class="agent-badge fiscal">
+                        <span class="badge-icon"></span>
+                        <span class="badge-text" data-i18n="agent.fiscal">Fiscal</span>
+                    </div>
+                    <p class="agent-message" data-i18n="status.waiting">Aguardando tarefas...</p>
+                </div>
+
+                <!-- Agente Sintetizador -->
+                <div id="agent-synthesizer" class="agent-card synthesizer idle">
+                    <div class="agent-avatar">
+                        <div class="agent-glow"></div>
+                        <img src="assets/agent_synthesizer.png" alt="Sintetizador">
+                    </div>
+                    <div class="agent-badge synthesizer">
+                        <span class="badge-icon"></span>
+                        <span class="badge-text" data-i18n="agent.synthesizer">Sintetizador</span>
+                    </div>
+                    <p class="agent-message" data-i18n="status.waiting">Aguardando tarefas...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Interface -->
+        <section id="chat" class="chat-container">
+            <!-- Mensagens -->
+            <div id="chat-messages" class="chat-messages">
+                <!-- Mensagens serão inseridas aqui via JavaScript -->
+            </div>
+
+            <!-- Input -->
+            <div class="chat-input-wrapper">
+                <div class="chat-input-glow"></div>
+                <form id="chat-form" class="chat-input-form">
+                    <input
+                        type="text"
+                        id="chat-input"
+                        class="chat-input"
+                        placeholder="Digite sua pergunta sobre política e legislação..."
+                        data-i18n-placeholder="chat.input.placeholder"
+                        autocomplete="off"
+                    >
+                    <button type="submit" id="chat-submit" class="chat-submit">
+                        <span class="btn-text" data-i18n="chat.button.send">Consultar</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Exemplos de Perguntas -->
+        <section class="examples-section">
+            <h3 data-i18n="examples.title">Exemplos de Perguntas</h3>
+            <div class="examples-grid">
+                <button class="example-btn" data-question="Quais são os deputados de São Paulo?" data-i18n="examples.q1">
+                    Quais são os deputados de São Paulo?
+                </button>
+                <button class="example-btn" data-question="Mostre as despesas do deputado Eduardo Bolsonaro" data-i18n="examples.q2">
+                    Mostre as despesas do deputado Eduardo Bolsonaro
+                </button>
+                <button class="example-btn" data-question="Projetos de lei sobre educação em 2024" data-i18n="examples.q3">
+                    Projetos de lei sobre educação em 2024
+                </button>
+                <button class="example-btn" data-question="Qual o histórico de votação de Tabata Amaral?" data-i18n="examples.q4">
+                    Qual o histórico de votação de Tabata Amaral?
+                </button>
+                <button class="example-btn" data-question="Gastos com combustível dos deputados de MG" data-i18n="examples.q5">
+                    Gastos com combustível dos deputados de MG
+                </button>
+                <button class="example-btn" data-question="Quais proposições sobre saúde estão em tramitação?" data-i18n="examples.q6">
+                    Quais proposições sobre saúde estão em tramitação?
+                </button>
+            </div>
+        </section>
+
+        <!-- Fontes de Dados -->
+        <section class="sources-section">
+            <h3 data-i18n="sources.title">Fontes de Dados Oficiais</h3>
+            <p class="subtitle" data-i18n="sources.subtitle">Todas as informações vêm de fontes públicas e confiáveis</p>
+
+            <div class="sources-grid">
+                <!-- API Câmara -->
+                <div class="source-card">
+                    <span class="source-icon">🏛️</span>
+                    <h4 data-i18n="sources.camara.title">API Câmara dos Deputados</h4>
+                    <p data-i18n="sources.camara.desc">Proposições, deputados, votações e tramitações em tempo real</p>
+                    <span class="source-badge" data-i18n="sources.camara.badge">Dados em Tempo Real</span>
+                </div>
+
+                <!-- Senado -->
+                <div class="source-card">
+                    <span class="source-icon">⚖️</span>
+                    <h4 data-i18n="sources.senado.title">Dados Abertos do Senado</h4>
+                    <p data-i18n="sources.senado.desc">Legislação federal e atividades parlamentares</p>
+                    <span class="source-badge" data-i18n="sources.senado.badge">Oficial</span>
+                </div>
+
+                <!-- Portal da Transparência -->
+                <div class="source-card">
+                    <span class="source-icon">💼</span>
+                    <h4 data-i18n="sources.transparencia.title">Portal da Transparência</h4>
+                    <p data-i18n="sources.transparencia.desc">Gastos públicos e despesas governamentais</p>
+                    <span class="source-badge" data-i18n="sources.transparencia.badge">Atualizado</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Como Funciona -->
+        <section class="sources-section">
+            <h3 data-i18n="howto.title">Como Funciona</h3>
+
+            <div class="sources-grid">
+                <div class="source-card">
+                    <span class="source-icon">❓</span>
+                    <h4 data-i18n="howto.step1.title">1. Você Pergunta</h4>
+                    <p data-i18n="howto.step1.desc">Digite sua dúvida sobre política, leis ou gastos públicos</p>
+                </div>
+
+                <div class="source-card">
+                    <span class="source-icon">🤖</span>
+                    <h4 data-i18n="howto.step2.title">2. Orquestrador Analisa</h4>
+                    <p data-i18n="howto.step2.desc">O sistema identifica quais especialistas devem responder</p>
+                </div>
+
+                <div class="source-card">
+                    <span class="source-icon">👥</span>
+                    <h4 data-i18n="howto.step3.title">3. Especialistas Trabalham</h4>
+                    <p data-i18n="howto.step3.desc">Agentes buscam dados simultaneamente nas APIs oficiais</p>
+                </div>
+
+                <div class="source-card">
+                    <span class="source-icon">📝</span>
+                    <h4 data-i18n="howto.step4.title">4. Sintetizador Consolida</h4>
+                    <p data-i18n="howto.step4.desc">As informações são organizadas de forma clara e objetiva</p>
+                </div>
+
+                <div class="source-card">
+                    <span class="source-icon">✅</span>
+                    <h4 data-i18n="howto.step5.title">5. Resposta Completa</h4>
+                    <p data-i18n="howto.step5.desc">Você recebe uma resposta compreensível e embasada</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#" data-i18n="footer.about">Sobre</a>
+                <a href="#" data-i18n="footer.docs">Documentação</a>
+                <a href="https://github.com" target="_blank" data-i18n="footer.github">GitHub</a>
+                <a href="#" data-i18n="footer.contact">Contato</a>
+                <a href="#" data-i18n="footer.privacy">Privacidade</a>
+                <a href="#" data-i18n="footer.terms">Termos de Uso</a>
+            </div>
+            <p class="footer-copy">
+                &copy; 2024 <span data-i18n="header.title">Agente Cidadão</span>.
+                <span data-i18n="footer.rights">Todos os direitos reservados</span>.
+                <span data-i18n="footer.opensource">Projeto de Código Aberto</span>.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/agents.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
