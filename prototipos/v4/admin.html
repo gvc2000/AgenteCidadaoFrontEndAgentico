@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Agente Cidadão</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+
+    <style>
+        body {
+            background: var(--color-bg-alt);
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .admin-header {
+            margin-bottom: 2rem;
+        }
+
+        .admin-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .admin-header p {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+            transition: all 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .metric-change {
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            margin-top: 0.25rem;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-card h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin: 0 0 1.5rem 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            background: var(--color-bg-alt);
+        }
+
+        .data-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .data-table td {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--color-bg-alt);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-badge.pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-badge.processing {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .btn-secondary {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            background: white;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-bg-alt);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <div class="header-logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <rect width="20" height="14" x="2" y="7" rx="2"/>
+                        <path d="M12 3a3 3 0 0 0-3 3v1m6-4a3 3 0 0 1 3 3v1"/>
+                    </svg>
+                </div>
+                <h1 data-i18n="header.title">Agente Cidadão</h1>
+            </div>
+
+            <nav class="header-nav">
+                <a href="index.html" data-i18n="nav.chat">Chat</a>
+                <a href="login.html" data-i18n="admin.logout">Sair</a>
+
+                <div class="language-selector">
+                    <button id="btn-pt" onclick="window.i18n.setLanguage('pt-br')" class="active">PT</button>
+                    <button id="btn-es" onclick="window.i18n.setLanguage('es')">ES</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 data-i18n="admin.dashboard">Dashboard</h1>
+            <p>Visão geral do sistema</p>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label" data-i18n="admin.metrics.total">Total de Consultas</div>
+                <div class="metric-value">1.247</div>
+                <div class="metric-change">+12% este mês</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label" data-i18n="admin.metrics.today">Consultas Hoje</div>
+                <div class="metric-value">84</div>
+                <div class="metric-change">+5% vs ontem</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label" data-i18n="admin.metrics.users">Usuários Ativos</div>
+                <div class="metric-value">342</div>
+                <div class="metric-change">+8% esta semana</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label" data-i18n="admin.metrics.avgtime">Tempo Médio</div>
+                <div class="metric-value">2.4s</div>
+                <div class="metric-change">-0.3s vs média</div>
+            </div>
+        </div>
+
+        <!-- Recent Requests -->
+        <div class="section-card">
+            <h2 data-i18n="admin.recent.title">Consultas Recentes</h2>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="admin.table.id">ID</th>
+                        <th data-i18n="admin.table.query">Pergunta</th>
+                        <th data-i18n="admin.table.status">Status</th>
+                        <th data-i18n="admin.table.time">Hora</th>
+                        <th data-i18n="admin.table.actions">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="requests-table">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- System Logs -->
+        <div class="section-card">
+            <h2 data-i18n="admin.logs">Logs do Sistema</h2>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Agente</th>
+                        <th>Request ID</th>
+                        <th>Status</th>
+                        <th>Mensagem</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-table">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script>
+        // Mock data
+        const requests = [
+            { id: 1001, query: 'Deputados de São Paulo', status: 'completed', time: '14:32' },
+            { id: 1002, query: 'Despesas Eduardo Bolsonaro', status: 'completed', time: '14:28' },
+            { id: 1003, query: 'PLs sobre educação', status: 'processing', time: '14:25' },
+            { id: 1004, query: 'Votação Tabata Amaral', status: 'completed', time: '14:20' },
+            { id: 1005, query: 'Gastos com combustível', status: 'completed', time: '14:15' }
+        ];
+
+        const logs = [
+            { time: '14:32:45', agent: 'Orquestrador', id: 1001, status: 'completed', msg: 'Delegando para 2 especialistas' },
+            { time: '14:32:42', agent: 'Político', id: 1001, status: 'processing', msg: 'Consultando bases de dados' },
+            { time: '14:32:40', agent: 'Orquestrador', id: 1001, status: 'processing', msg: 'Analisando pergunta' },
+            { time: '14:28:15', agent: 'Sintetizador', id: 1002, status: 'completed', msg: 'Resposta pronta' },
+            { time: '14:28:10', agent: 'Fiscal', id: 1002, status: 'completed', msg: 'Total: R$ 127.450' }
+        ];
+
+        // Populate requests
+        const requestsTable = document.getElementById('requests-table');
+        requests.forEach(r => {
+            requestsTable.innerHTML += `
+                <tr>
+                    <td>#${r.id}</td>
+                    <td>${r.query}</td>
+                    <td><span class="status-badge ${r.status}">${r.status}</span></td>
+                    <td>${r.time}</td>
+                    <td><button class="btn-secondary">Ver</button></td>
+                </tr>
+            `;
+        });
+
+        // Populate logs
+        const logsTable = document.getElementById('logs-table');
+        logs.forEach(l => {
+            logsTable.innerHTML += `
+                <tr>
+                    <td>${l.time}</td>
+                    <td>${l.agent}</td>
+                    <td>#${l.id}</td>
+                    <td><span class="status-badge ${l.status}">${l.status}</span></td>
+                    <td>${l.msg}</td>
+                </tr>
+            `;
+        });
+    </script>
+</body>
+</html>
