@@ -18,17 +18,24 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
+# Install gettext for envsubst
+RUN apk add --no-cache gettext
+
 # Copy built files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration template and entrypoint script
+COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-# Expose port
-EXPOSE 80
+# Make entrypoint executable
+RUN chmod +x /docker-entrypoint.sh
 
-# Health check
+# Expose port (Railway will set PORT env var)
+EXPOSE ${PORT:-80}
+
+# Health check - Railway provides PORT variable
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-80}/ || exit 1
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
