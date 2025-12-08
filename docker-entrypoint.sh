@@ -19,6 +19,10 @@ if [ -d "/usr/share/nginx/html" ]; then
     if [ -f "/usr/share/nginx/html/index.html" ]; then
         echo "✓ index.html found"
         echo "index.html size: $(wc -c < /usr/share/nginx/html/index.html) bytes"
+        echo "index.html permissions: $(ls -l /usr/share/nginx/html/index.html)"
+        echo "First 200 chars of index.html:"
+        head -c 200 /usr/share/nginx/html/index.html
+        echo ""
     else
         echo "✗ ERROR: index.html NOT FOUND!"
     fi
