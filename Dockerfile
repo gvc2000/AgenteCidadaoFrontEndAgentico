@@ -10,6 +10,9 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
+# Remove default nginx files to avoid conflicts
+RUN rm -rf /usr/share/nginx/html/*
+
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
