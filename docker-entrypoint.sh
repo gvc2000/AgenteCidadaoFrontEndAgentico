@@ -45,4 +45,30 @@ nginx -t
 
 echo "Starting nginx on port $PORT (listening on 0.0.0.0:$PORT)..."
 echo "Nginx will accept connections from Railway proxy."
+
+# Start nginx in background to test if it starts successfully
+nginx
+
+# Wait for nginx to start
+sleep 2
+
+# Check if nginx is running and responding
+echo "Testing if nginx is responding..."
+if wget -q -O /tmp/test.html http://localhost:$PORT/ 2>&1; then
+    echo "✓ SUCCESS: Nginx is responding on port $PORT!"
+    cat /tmp/test.html | head -c 100
+    echo ""
+else
+    echo "✗ ERROR: Nginx not responding on localhost:$PORT"
+    echo "Checking if nginx process is running..."
+    ps aux | grep nginx
+    echo "Checking port bindings..."
+    netstat -tlnp 2>/dev/null || ss -tlnp 2>/dev/null || echo "netstat/ss not available"
+fi
+
+# Stop background nginx
+nginx -s stop 2>/dev/null || true
+sleep 1
+
+echo "Starting nginx in foreground..."
 exec nginx -g 'daemon off;'
