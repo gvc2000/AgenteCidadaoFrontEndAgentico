@@ -31,11 +31,7 @@ COPY docker-entrypoint.sh /docker-entrypoint.sh
 # Make entrypoint executable
 RUN chmod +x /docker-entrypoint.sh
 
-# Expose port (Railway will set PORT env var)
-EXPOSE ${PORT:-80}
-
-# Health check - Railway provides PORT variable
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-80}/ || exit 1
+# Expose port - Railway will override with PORT env var
+EXPOSE 80
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
