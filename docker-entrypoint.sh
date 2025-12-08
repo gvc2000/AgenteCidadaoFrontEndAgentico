@@ -4,10 +4,23 @@ set -e
 # Use PORT from environment or default to 80
 PORT=${PORT:-80}
 
-echo "Starting nginx on port $PORT..."
+echo "=========================================="
+echo "Railway Nginx Startup - VERSION 2.0"
+echo "Script updated: Dec 8, 2025 - 14:35 UTC"
+echo "PORT environment variable: $PORT"
+echo "=========================================="
 
 # Replace PORT in nginx config template
+echo "Generating nginx configuration from template..."
 envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
 
-# Start nginx
+# Show the generated config for debugging
+echo "Generated nginx config:"
+cat /etc/nginx/conf.d/default.conf | head -10
+
+# Test nginx configuration
+echo "Testing nginx configuration..."
+nginx -t
+
+echo "Starting nginx on port $PORT..."
 exec nginx -g 'daemon off;'
