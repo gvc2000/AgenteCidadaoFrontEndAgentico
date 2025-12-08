@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:clean": "rm -rf dist && npm run build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:check": "npm run lint && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.84.0",
