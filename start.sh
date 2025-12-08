@@ -9,7 +9,7 @@ echo "Listening on: 0.0.0.0:$PORT"
 # Generate simple nginx config
 cat > /etc/nginx/conf.d/default.conf <<EOF
 server {
-    listen $PORT;
+    listen 0.0.0.0:$PORT;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;
