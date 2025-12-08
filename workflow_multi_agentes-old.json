@@ -1104,40 +1104,39 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "OpenRouter Chat Model4": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Sintetizador",
-            "type": "ai_languageModel",
-            "index": 0
-          }
+      },
+      "OpenRouter Chat Model4": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Sintetizador",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
         ]
-      ]
-    },
-    "MCP Client3": {
-      "ai_tool": [
-        [
-          {
-            "node": "Agente Legislativo",
-            "type": "ai_tool",
-            "index": 0
-          }
+      },
+      "MCP Client3": {
+        "ai_tool": [
+          [
+            {
+              "node": "Agente Legislativo",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
         ]
-      ]
-    }
-  },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "8f91f0bf-d0d8-44bb-b3ef-9a358c06301b",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "47c0851f3c62960484133b2e05ab8fb867cdf9e457bce7861d8db6cc8982ffba"
-  },
-  "id": "KfG18yoo9n7C0odE",
-  "tags": []
-}
+      }
+    },
+    "active": true,
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "versionId": "8f91f0bf-d0d8-44bb-b3ef-9a358c06301b",
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "47c0851f3c62960484133b2e05ab8fb867cdf9e457bce7861d8db6cc8982ffba"
+    },
+    "id": "KfG18yoo9n7C0odE",
+    "tags": []
+  }
