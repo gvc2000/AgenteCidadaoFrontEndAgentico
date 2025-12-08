@@ -13,7 +13,8 @@ FROM nginx:alpine
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy startup script
+# Copy nginx config template and startup script
+COPY nginx.conf.template /nginx.conf.template
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
