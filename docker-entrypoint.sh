@@ -5,7 +5,8 @@ set -e
 PORT=${PORT:-80}
 
 echo "=========================================="
-echo "Railway Nginx Startup"
+echo "Railway Nginx Startup - VERSION 2.0"
+echo "Script updated: Dec 8, 2025 - 14:35 UTC"
 echo "PORT environment variable: $PORT"
 echo "=========================================="
 
@@ -21,5 +22,5 @@ cat /etc/nginx/conf.d/default.conf | head -10
 echo "Testing nginx configuration..."
 nginx -t
 
-echo "Starting nginx..."
+echo "Starting nginx on port $PORT..."
 exec nginx -g 'daemon off;'
