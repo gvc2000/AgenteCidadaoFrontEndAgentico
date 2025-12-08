@@ -18,7 +18,7 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Install gettext for envsubst
+# Install gettext for envsubst (needed for PORT substitution)
 RUN apk add --no-cache gettext
 
 # Copy built files from builder stage
@@ -29,7 +29,8 @@ COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 # Make entrypoint executable
-RUN chmod +x /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh && \
+    echo "Build timestamp: $(date)" > /build-info.txt
 
 # Expose port - Railway will override with PORT env var
 EXPOSE 80
