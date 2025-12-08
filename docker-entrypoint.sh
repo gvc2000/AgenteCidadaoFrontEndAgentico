@@ -10,6 +10,23 @@ echo "Script updated: Dec 8, 2025 - 14:35 UTC"
 echo "PORT environment variable: $PORT"
 echo "=========================================="
 
+# Verify built files exist
+echo "Checking built files..."
+if [ -d "/usr/share/nginx/html" ]; then
+    echo "HTML directory exists"
+    echo "Files in /usr/share/nginx/html:"
+    ls -lah /usr/share/nginx/html/
+    if [ -f "/usr/share/nginx/html/index.html" ]; then
+        echo "✓ index.html found"
+        echo "index.html size: $(wc -c < /usr/share/nginx/html/index.html) bytes"
+    else
+        echo "✗ ERROR: index.html NOT FOUND!"
+    fi
+else
+    echo "✗ ERROR: /usr/share/nginx/html does not exist!"
+fi
+echo "=========================================="
+
 # Replace PORT in nginx config template
 echo "Generating nginx configuration from template..."
 envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
