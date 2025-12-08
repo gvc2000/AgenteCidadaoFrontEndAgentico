@@ -4,6 +4,10 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Enable detailed logging
+    access_log /dev/stdout;
+    error_log /dev/stderr debug;
+
     # Gzip compression
     gzip on;
     gzip_vary on;
