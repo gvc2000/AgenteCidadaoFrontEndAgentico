@@ -1,3 +1,35 @@
+# Agente Cidadão - Frontend Multi-Agentes
+
+Aplicação frontend React + TypeScript + Vite para sistema multi-agentes integrado com Supabase e n8n.
+
+## 🚀 Deploy
+
+Para instruções detalhadas de deploy no Railway.com, consulte [DEPLOY.md](./DEPLOY.md)
+
+## 🏃‍♂️ Desenvolvimento Local
+
+```bash
+# 1. Copiar variáveis de ambiente
+cp .env.example .env
+
+# 2. Configurar suas credenciais no arquivo .env
+
+# 3. Instalar dependências
+npm install
+
+# 4. Rodar em modo desenvolvimento
+npm run dev
+```
+
+## 📦 Build de Produção
+
+```bash
+npm run build
+npm run preview
+```
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
