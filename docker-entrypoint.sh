@@ -39,5 +39,6 @@ cat /etc/nginx/conf.d/default.conf | head -10
 echo "Testing nginx configuration..."
 nginx -t
 
-echo "Starting nginx on port $PORT..."
+echo "Starting nginx on port $PORT (listening on 0.0.0.0:$PORT)..."
+echo "Nginx will accept connections from Railway proxy."
 exec nginx -g 'daemon off;'
