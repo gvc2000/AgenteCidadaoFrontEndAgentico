@@ -48,15 +48,15 @@ function App() {
 
       const requestId = data.id;
 
-      // Setup global timeout (2 minutes)
+      // Setup global timeout (90 seconds - reduced from 2 minutes)
       const timeoutId = setTimeout(() => {
-        console.error('⏱️ Workflow timeout exceeded (120s)');
+        console.error('⏱️ Workflow timeout exceeded (90s)');
         setIsLoading(false);
 
         // Mark all non-completed agents as timeout
         setAgents(prev => prev.map(a => {
           if (a.status === 'working' || a.status === 'info') {
-            return { ...a, status: 'error', message: 'Timeout: operação demorou muito' };
+            return { ...a, status: 'timeout', message: 'Timeout: operação demorou muito' };
           }
           return a;
         }));
@@ -65,14 +65,14 @@ function App() {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
           role: 'assistant',
-          content: '⏱️ **Tempo esgotado**: A operação demorou mais de 2 minutos e foi cancelada. Por favor, tente novamente ou reformule sua pergunta.',
+          content: '⏱️ **Tempo esgotado**: A operação demorou mais de 90 segundos e foi cancelada. Por favor, tente novamente ou reformule sua pergunta.',
           timestamp: new Date()
         }]);
 
         // Cleanup channels
         supabase.removeChannel(logsChannel);
         supabase.removeChannel(requestChannel);
-      }, 120000); // 2 minutes
+      }, 90000); // 90 seconds
 
       setWorkflowTimeoutId(timeoutId);
 
@@ -92,6 +92,39 @@ function App() {
 
             if (idToUse) {
               updateAgentStatus(idToUse, log.status, log.message);
+
+              // Detect errors from agent logs
+              if (log.status === 'error' || log.message?.toLowerCase().includes('erro')) {
+                console.error('❌ Error detected in agent log:', log);
+
+                // Clear timeout
+                if (workflowTimeoutId) {
+                  clearTimeout(workflowTimeoutId);
+                  setWorkflowTimeoutId(null);
+                }
+
+                setIsLoading(false);
+
+                // Add error message if not already present
+                setTimeout(() => {
+                  setMessages(prev => {
+                    const lastMessage = prev[prev.length - 1];
+                    if (lastMessage?.role !== 'assistant' || !lastMessage.content.includes('❌')) {
+                      return [...prev, {
+                        id: Date.now().toString(),
+                        role: 'assistant',
+                        content: `❌ **Erro detectado**: ${log.message || 'Ocorreu um erro durante o processamento. Por favor, tente novamente.'}`,
+                        timestamp: new Date()
+                      }];
+                    }
+                    return prev;
+                  });
+                }, 1000);
+
+                // Cleanup channels
+                supabase.removeChannel(logsChannel);
+                supabase.removeChannel(requestChannel);
+              }
             } else {
               console.warn('⚠️ No agent identifier found in log:', log);
             }
