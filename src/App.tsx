@@ -162,7 +162,14 @@ function App() {
 
     setAgents(prev => prev.map(a => {
       if (a.id === normalizedId) {
-        return { ...a, status: status as any, message };
+        // Se está começando a trabalhar, adiciona startTime
+        const isStartingWork = (status === 'working' || status === 'info') && a.status !== 'working' && a.status !== 'info';
+        return {
+          ...a,
+          status: status as any,
+          message,
+          startTime: isStartingWork ? Date.now() : a.startTime
+        };
       }
       return a;
     }));
