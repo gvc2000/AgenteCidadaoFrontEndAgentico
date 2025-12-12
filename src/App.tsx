@@ -18,14 +18,22 @@ function App() {
     { id: 'consolidator', name: 'Consolidador', status: 'idle', message: '' },
   ]);
 
+  // Global timeout for entire workflow (2 minutes)
+  const [workflowTimeoutId, setWorkflowTimeoutId] = useState<number | null>(null);
+
   const handleSendMessage = async (content: string) => {
+    // Clear any existing timeout
+    if (workflowTimeoutId) {
+      clearTimeout(workflowTimeoutId);
+    }
+
     // Add user message
     const userMsg = { id: Date.now().toString(), role: 'user', content, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
     // Reset agents
-    setAgents(prev => prev.map(a => ({ ...a, status: 'idle', message: '' })));
+    setAgents(prev => prev.map(a => ({ ...a, status: 'idle', message: '', startTime: undefined })));
 
     try {
       // 1. Create request in Supabase
@@ -39,6 +47,34 @@ function App() {
       if (error) throw error;
 
       const requestId = data.id;
+
+      // Setup global timeout (2 minutes)
+      const timeoutId = setTimeout(() => {
+        console.error('⏱️ Workflow timeout exceeded (120s)');
+        setIsLoading(false);
+
+        // Mark all non-completed agents as timeout
+        setAgents(prev => prev.map(a => {
+          if (a.status === 'working' || a.status === 'info') {
+            return { ...a, status: 'error', message: 'Timeout: operação demorou muito' };
+          }
+          return a;
+        }));
+
+        // Add error message
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: '⏱️ **Tempo esgotado**: A operação demorou mais de 2 minutos e foi cancelada. Por favor, tente novamente ou reformule sua pergunta.',
+          timestamp: new Date()
+        }]);
+
+        // Cleanup channels
+        supabase.removeChannel(logsChannel);
+        supabase.removeChannel(requestChannel);
+      }, 120000); // 2 minutes
+
+      setWorkflowTimeoutId(timeoutId);
 
       // 2. Subscribe to agent_logs (Realtime)
       const logsChannel = supabase
@@ -73,7 +109,15 @@ function App() {
           { event: 'UPDATE', schema: 'public', table: 'requests', filter: `id=eq.${requestId}` },
           (payload) => {
             const updatedRequest = payload.new;
+
+            // Handle completion
             if (updatedRequest.status === 'completed' && updatedRequest.final_response) {
+              // Clear timeout
+              if (workflowTimeoutId) {
+                clearTimeout(workflowTimeoutId);
+                setWorkflowTimeoutId(null);
+              }
+
               setIsLoading(false);
               setMessages(prev => [...prev, {
                 id: Date.now().toString(),
@@ -81,8 +125,38 @@ function App() {
                 content: updatedRequest.final_response,
                 timestamp: new Date()
               }]);
-              // Reset agents to idle state to stop animations
-              setAgents(prev => prev.map(a => ({ ...a, status: 'idle', message: 'Concluído' })));
+              // Mark all agents as completed
+              setAgents(prev => prev.map(a => ({ ...a, status: 'completed', message: 'Concluído' })));
+
+              // Cleanup channels
+              supabase.removeChannel(logsChannel);
+              supabase.removeChannel(requestChannel);
+            }
+
+            // Handle errors
+            if (updatedRequest.status === 'failed' || updatedRequest.status === 'error') {
+              // Clear timeout
+              if (workflowTimeoutId) {
+                clearTimeout(workflowTimeoutId);
+                setWorkflowTimeoutId(null);
+              }
+
+              setIsLoading(false);
+
+              // Mark all working agents as error
+              setAgents(prev => prev.map(a => {
+                if (a.status === 'working' || a.status === 'info') {
+                  return { ...a, status: 'error', message: 'Falha na execução' };
+                }
+                return a;
+              }));
+
+              setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: `❌ **Erro no processamento**: ${updatedRequest.error_message || 'Ocorreu um erro inesperado. Por favor, tente novamente.'}`,
+                timestamp: new Date()
+              }]);
 
               // Cleanup channels
               supabase.removeChannel(logsChannel);

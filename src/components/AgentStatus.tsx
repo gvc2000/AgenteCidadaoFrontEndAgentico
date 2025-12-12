@@ -6,7 +6,7 @@ export type AgentType = 'orchestrator' | 'legislative' | 'political' | 'fiscal' 
 export interface AgentState {
     id: AgentType;
     name: string;
-    status: 'idle' | 'working' | 'info' | 'completed' | 'error';
+    status: 'idle' | 'working' | 'info' | 'completed' | 'error' | 'timeout';
     message: string;
     startTime?: number;
 }
@@ -26,31 +26,42 @@ const iconMap = {
 const AgentCard: React.FC<{ agent: AgentState }> = ({ agent }) => {
     const Icon = iconMap[agent.id];
     const [elapsed, setElapsed] = useState(0);
+    const [isStalled, setIsStalled] = useState(false);
 
     // Treat 'info' as working for animation purposes
     const isWorking = agent.status === 'working' || agent.status === 'info';
     const isCompleted = agent.status === 'completed';
-    const isError = agent.status === 'error';
+    const isError = agent.status === 'error' || agent.status === 'timeout';
+    const isTimeout = agent.status === 'timeout';
 
-    // Timer for working agents
+    // Timer for working agents + stall detection
     useEffect(() => {
         if (isWorking && agent.startTime) {
             const interval = setInterval(() => {
-                setElapsed(Math.floor((Date.now() - agent.startTime!) / 1000));
+                const currentElapsed = Math.floor((Date.now() - agent.startTime!) / 1000);
+                setElapsed(currentElapsed);
+
+                // Warn if agent is taking too long (>45 seconds)
+                if (currentElapsed > 45 && !isStalled) {
+                    setIsStalled(true);
+                }
             }, 1000);
             return () => clearInterval(interval);
         } else {
             setElapsed(0);
+            setIsStalled(false);
         }
-    }, [isWorking, agent.startTime]);
+    }, [isWorking, agent.startTime, isStalled]);
 
     return (
         <div
             className={`
                 relative overflow-hidden rounded-xl p-4 border transition-all duration-500 transform
-                ${isWorking ? 'border-[var(--camara-green)] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-105 ring-2 ring-[var(--camara-green)]/20' : ''}
+                ${isWorking && !isStalled ? 'border-[var(--camara-green)] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-105 ring-2 ring-[var(--camara-green)]/20' : ''}
+                ${isWorking && isStalled ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-lg scale-105 ring-2 ring-yellow-400/30' : ''}
                 ${isCompleted ? 'border-green-300 bg-green-50/70 shadow-md' : ''}
-                ${isError ? 'border-red-300 bg-red-50/70 shadow-md' : ''}
+                ${isError && !isTimeout ? 'border-red-300 bg-red-50/70 shadow-md' : ''}
+                ${isTimeout ? 'border-orange-300 bg-orange-50/70 shadow-md' : ''}
                 ${!isWorking && !isCompleted && !isError ? 'border-slate-200 bg-white' : ''}
             `}
         >
@@ -106,11 +117,19 @@ const AgentCard: React.FC<{ agent: AgentState }> = ({ agent }) => {
                                         </span>
                                     </>
                                 )}
-                                {isError && (
+                                {isError && !isTimeout && (
                                     <>
                                         <AlertCircle size={12} className="text-red-600" />
                                         <span className="text-xs text-red-600 font-semibold">
                                             Erro
+                                        </span>
+                                    </>
+                                )}
+                                {isTimeout && (
+                                    <>
+                                        <Clock size={12} className="text-orange-600" />
+                                        <span className="text-xs text-orange-600 font-semibold">
+                                            Timeout
                                         </span>
                                     </>
                                 )}
@@ -128,8 +147,12 @@ const AgentCard: React.FC<{ agent: AgentState }> = ({ agent }) => {
 
                     {/* Timer for working agents */}
                     {isWorking && elapsed > 0 && (
-                        <div className="text-xs font-mono text-slate-500 bg-white/70 px-2 py-1 rounded">
-                            {elapsed}s
+                        <div className={`text-xs font-mono px-2 py-1 rounded ${
+                            isStalled
+                                ? 'text-orange-700 bg-orange-100/80 font-bold'
+                                : 'text-slate-500 bg-white/70'
+                        }`}>
+                            {elapsed}s {isStalled && '⚠️'}
                         </div>
                     )}
                 </div>
