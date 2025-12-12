@@ -48,9 +48,9 @@ function App() {
 
       const requestId = data.id;
 
-      // Setup global timeout (90 seconds - reduced from 2 minutes)
+      // Setup global timeout (120 seconds / 2 minutes)
       const timeoutId = setTimeout(() => {
-        console.error('⏱️ Workflow timeout exceeded (90s)');
+        console.error('⏱️ Workflow timeout exceeded (120s)');
         setIsLoading(false);
 
         // Mark all non-completed agents as timeout
@@ -65,14 +65,14 @@ function App() {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
           role: 'assistant',
-          content: '⏱️ **Tempo esgotado**: A operação demorou mais de 90 segundos e foi cancelada. Por favor, tente novamente ou reformule sua pergunta.',
+          content: '⏱️ **Tempo esgotado**: A operação demorou mais de 2 minutos e foi cancelada. Por favor, tente novamente ou reformule sua pergunta.',
           timestamp: new Date()
         }]);
 
         // Cleanup channels
         supabase.removeChannel(logsChannel);
         supabase.removeChannel(requestChannel);
-      }, 90000); // 90 seconds
+      }, 120000); // 2 minutes (workflows multi-agent precisam de mais tempo)
 
       setWorkflowTimeoutId(timeoutId);
 
