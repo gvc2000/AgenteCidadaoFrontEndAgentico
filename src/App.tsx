@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Shield, LayoutDashboard } from 'lucide-react';
+import { Shield, Bot } from 'lucide-react';
 import { ChatInterface } from './components/ChatInterface';
 import { AgentStatus, type AgentState } from './components/AgentStatus';
+import { SidebarExamples } from './components/SidebarExamples';
+import { SidebarDataSources } from './components/SidebarDataSources';
+import { LanguageSelector } from './components/LanguageSelector';
+import { LanguageProvider, useTranslation } from './i18n';
 import { supabase } from './lib/supabase';
 
 import { AdminPage } from './pages/Admin';
 
-function App() {
+function MainApp() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const [agents, setAgents] = useState<AgentState[]>([
     { id: 'orchestrator', name: 'Orquestrador', status: 'idle', message: '' },
     { id: 'legislative', name: 'Legislativo', status: 'idle', message: '' },
@@ -20,6 +27,11 @@ function App() {
 
   // Global timeout for entire workflow (2 minutes)
   const [workflowTimeoutId, setWorkflowTimeoutId] = useState<number | null>(null);
+
+  const handleExampleClick = (question: string) => {
+    setInputValue(question);
+    inputRef.current?.focus();
+  };
 
   const handleSendMessage = async (content: string) => {
     // Clear any existing timeout
@@ -37,7 +49,6 @@ function App() {
 
     try {
       // 1. Create request in Supabase
-      // Note: Database expects 'user_query', not 'content'
       const { data, error } = await supabase
         .from('requests')
         .insert([{ user_query: content, status: 'pending' }])
@@ -48,15 +59,15 @@ function App() {
 
       const requestId = data.id;
 
-      // Setup global timeout (120 seconds / 2 minutes)
+      // Setup global timeout (240 seconds / 4 minutes)
       const timeoutId = setTimeout(() => {
-        console.error('⏱️ Workflow timeout exceeded (120s)');
+        console.error('⏱️ Workflow timeout exceeded (240s)');
         setIsLoading(false);
 
         // Mark all non-completed agents as timeout
         setAgents(prev => prev.map(a => {
           if (a.status === 'working' || a.status === 'info') {
-            return { ...a, status: 'timeout', message: 'Timeout: operação demorou muito' };
+            return { ...a, status: 'timeout', message: t.timeoutMessage };
           }
           return a;
         }));
@@ -65,14 +76,14 @@ function App() {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
           role: 'assistant',
-          content: '⏱️ **Tempo esgotado**: A operação demorou mais de 2 minutos e foi cancelada. Por favor, tente novamente ou reformule sua pergunta.',
+          content: `⏱️ **${t.timeoutMessage}**`,
           timestamp: new Date()
         }]);
 
         // Cleanup channels
         supabase.removeChannel(logsChannel);
         supabase.removeChannel(requestChannel);
-      }, 120000); // 2 minutes (workflows multi-agent precisam de mais tempo)
+      }, 240000);
 
       setWorkflowTimeoutId(timeoutId);
 
@@ -86,18 +97,15 @@ function App() {
             console.log('🔄 Realtime Payload:', payload);
             const log = payload.new;
 
-            // Support both agent_id (schema) and agent_name (n8n default)
             const idToUse = log.agent_id || log.agent_name;
             console.log('🎯 Agent ID to use:', idToUse);
 
             if (idToUse) {
               updateAgentStatus(idToUse, log.status, log.message);
 
-              // Detect errors from agent logs
               if (log.status === 'error' || log.message?.toLowerCase().includes('erro')) {
                 console.error('❌ Error detected in agent log:', log);
 
-                // Clear timeout
                 if (workflowTimeoutId) {
                   clearTimeout(workflowTimeoutId);
                   setWorkflowTimeoutId(null);
@@ -105,7 +113,6 @@ function App() {
 
                 setIsLoading(false);
 
-                // Add error message if not already present
                 setTimeout(() => {
                   setMessages(prev => {
                     const lastMessage = prev[prev.length - 1];
@@ -113,7 +120,7 @@ function App() {
                       return [...prev, {
                         id: Date.now().toString(),
                         role: 'assistant',
-                        content: `❌ **Erro detectado**: ${log.message || 'Ocorreu um erro durante o processamento. Por favor, tente novamente.'}`,
+                        content: `❌ **${t.errorMessage}**: ${log.message || t.errorMessage}`,
                         timestamp: new Date()
                       }];
                     }
@@ -121,12 +128,9 @@ function App() {
                   });
                 }, 1000);
 
-                // Cleanup channels
                 supabase.removeChannel(logsChannel);
                 supabase.removeChannel(requestChannel);
               }
-            } else {
-              console.warn('⚠️ No agent identifier found in log:', log);
             }
           }
         )
@@ -143,9 +147,7 @@ function App() {
           (payload) => {
             const updatedRequest = payload.new;
 
-            // Handle completion
             if (updatedRequest.status === 'completed' && updatedRequest.final_response) {
-              // Clear timeout
               if (workflowTimeoutId) {
                 clearTimeout(workflowTimeoutId);
                 setWorkflowTimeoutId(null);
@@ -158,17 +160,13 @@ function App() {
                 content: updatedRequest.final_response,
                 timestamp: new Date()
               }]);
-              // Mark all agents as completed
-              setAgents(prev => prev.map(a => ({ ...a, status: 'completed', message: 'Concluído' })));
+              setAgents(prev => prev.map(a => ({ ...a, status: 'completed', message: t.statusCompleted })));
 
-              // Cleanup channels
               supabase.removeChannel(logsChannel);
               supabase.removeChannel(requestChannel);
             }
 
-            // Handle errors
             if (updatedRequest.status === 'failed' || updatedRequest.status === 'error') {
-              // Clear timeout
               if (workflowTimeoutId) {
                 clearTimeout(workflowTimeoutId);
                 setWorkflowTimeoutId(null);
@@ -176,10 +174,9 @@ function App() {
 
               setIsLoading(false);
 
-              // Mark all working agents as error
               setAgents(prev => prev.map(a => {
                 if (a.status === 'working' || a.status === 'info') {
-                  return { ...a, status: 'error', message: 'Falha na execução' };
+                  return { ...a, status: 'error', message: t.statusError };
                 }
                 return a;
               }));
@@ -187,11 +184,10 @@ function App() {
               setMessages(prev => [...prev, {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: `❌ **Erro no processamento**: ${updatedRequest.error_message || 'Ocorreu um erro inesperado. Por favor, tente novamente.'}`,
+                content: `❌ **${t.errorMessage}**: ${updatedRequest.error_message || t.errorMessage}`,
                 timestamp: new Date()
               }]);
 
-              // Cleanup channels
               supabase.removeChannel(logsChannel);
               supabase.removeChannel(requestChannel);
             }
@@ -229,11 +225,10 @@ function App() {
           }
         } catch (fetchError) {
           console.error('Network error calling n8n:', fetchError);
-          // Don't throw here to avoid breaking the UI flow, but log it clearly
           setMessages(prev => [...prev, {
             id: Date.now().toString(),
             role: 'assistant',
-            content: `Erro de comunicação com o Agente: ${(fetchError as Error).message}. Verifique o console para mais detalhes.`,
+            content: `${t.networkError}: ${(fetchError as Error).message}`,
             timestamp: new Date()
           }]);
         }
@@ -248,14 +243,13 @@ function App() {
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `Erro ao enviar solicitação: ${errorMessage}. (Verifique o console para detalhes técnicos)`,
+        content: `${t.errorMessage}: ${errorMessage}`,
         timestamp: new Date()
       }]);
     }
   };
 
   const updateAgentStatus = (agentId: string, status: string, message: string) => {
-    // Map n8n agent names to frontend IDs
     const agentMap: Record<string, string> = {
       'Orquestrador': 'orchestrator',
       'Legislativo': 'legislative',
@@ -269,7 +263,6 @@ function App() {
 
     setAgents(prev => prev.map(a => {
       if (a.id === normalizedId) {
-        // Se está começando a trabalhar, adiciona startTime
         const isStartingWork = (status === 'working' || status === 'info') && a.status !== 'working' && a.status !== 'info';
         return {
           ...a,
@@ -283,51 +276,97 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col">
-        {/* Header */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-[var(--camara-green)] p-2 rounded-lg">
-                <Shield className="text-white" size={24} />
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col">
+      {/* Header - Compact */}
+      <header className="header">
+        <div className="header-content">
+          <div className="logo-section">
+            <Link to="/" className="app-logo">
+              <div className="app-icon">
+                <Bot size={24} />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-[var(--camara-green-dark)] tracking-tight">Agente Cidadão</h1>
-                <p className="text-xs text-slate-500 font-medium">Transparência Legislativa com IA</p>
+              <div className="app-title">
+                <h1>{t.appTitle}</h1>
+                <p>{t.appSubtitle}</p>
               </div>
-            </div>
-
-            <nav className="flex items-center gap-4">
-              <Link to="/" className="text-sm font-medium text-slate-600 hover:text-[var(--camara-green)] transition-colors">Chat</Link>
-              <Link to="/admin" className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[var(--camara-green)] transition-colors">
-                <LayoutDashboard size={16} />
-                Admin
-              </Link>
-            </nav>
+            </Link>
           </div>
-        </header>
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Routes>
-            <Route path="/" element={
-              <div className="flex flex-col h-[calc(100vh-8rem)]">
+          {/* Official Data Badge */}
+          <div className="official-badge">
+            <Shield size={18} />
+            <div>
+              <span className="badge-title">{t.officialData}</span>
+              <span className="badge-subtitle">{t.directConsult}</span>
+            </div>
+          </div>
+
+          <div className="header-actions">
+            <LanguageSelector />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <Routes>
+        <Route path="/" element={
+          <>
+            <main className="main-container flex-1">
+              {/* Left Sidebar - Examples */}
+              <SidebarExamples onExampleClick={handleExampleClick} />
+
+              {/* Center - Chat */}
+              <div className="flex flex-col gap-4">
                 <AgentStatus agents={agents} />
-                <div className="flex-1 min-h-0">
-                  <ChatInterface
-                    messages={messages}
-                    onSendMessage={handleSendMessage}
-                    isLoading={isLoading}
-                  />
-                </div>
+                <ChatInterface
+                  messages={messages}
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                  inputValue={inputValue}
+                  onInputChange={setInputValue}
+                  inputRef={inputRef}
+                />
               </div>
-            } />
-            <Route path="/admin" element={<AdminPage />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+
+              {/* Right Sidebar - Data Sources */}
+              <SidebarDataSources />
+            </main>
+
+            {/* Footer */}
+            <footer className="footer">
+              <div className="footer-content">
+                <p>{t.footerText}</p>
+                <div className="footer-links">
+                  <a href="https://dadosabertos.camara.leg.br/" target="_blank" rel="noopener noreferrer" className="footer-link">
+                    {t.openDataPortal}
+                  </a>
+                  <a href="https://dadosabertos.camara.leg.br/swagger/api.html" target="_blank" rel="noopener noreferrer" className="footer-link">
+                    {t.apiDocsLink}
+                  </a>
+                  <Link to="/admin" className="footer-link">
+                    {t.navAdmin}
+                  </Link>
+                </div>
+                <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.8 }}>
+                  {t.footerNote}
+                </p>
+              </div>
+            </footer>
+          </>
+        } />
+        <Route path="/admin" element={<AdminPage />} />
+      </Routes>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <LanguageProvider>
+      <Router>
+        <MainApp />
+      </Router>
+    </LanguageProvider>
   );
 }
 
