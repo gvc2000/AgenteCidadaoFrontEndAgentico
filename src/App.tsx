@@ -59,9 +59,9 @@ function MainApp() {
 
       const requestId = data.id;
 
-      // Setup global timeout (240 seconds / 4 minutes)
+      // Setup global timeout (360 seconds / 6 minutes) - safety net for n8n failures
       const timeoutId = setTimeout(() => {
-        console.error('⏱️ Workflow timeout exceeded (240s)');
+        console.error('⏱️ Workflow timeout exceeded (360s)');
         setIsLoading(false);
 
         // Mark all non-completed agents as timeout
@@ -83,7 +83,7 @@ function MainApp() {
         // Cleanup channels
         supabase.removeChannel(logsChannel);
         supabase.removeChannel(requestChannel);
-      }, 240000);
+      }, 360000);
 
       setWorkflowTimeoutId(timeoutId);
 
