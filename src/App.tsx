@@ -87,25 +87,105 @@ function MainApp() {
 
       setWorkflowTimeoutId(timeoutId);
 
-      // 2. Subscribe to agent_logs (Realtime)
-      const logsChannel = supabase
-        .channel(`logs-${requestId}`)
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'agent_logs', filter: `request_id=eq.${requestId}` },
-          (payload) => {
-            console.log('🔄 Realtime Payload:', payload);
-            const log = payload.new;
+      // 2. Subscribe to agent_logs (Realtime) - Declare channels first
+      let logsChannel: ReturnType<typeof supabase.channel>;
+      let requestChannel: ReturnType<typeof supabase.channel>;
 
-            const idToUse = log.agent_id || log.agent_name;
-            console.log('🎯 Agent ID to use:', idToUse);
+      // Create a promise that resolves when both subscriptions are ready
+      const subscriptionsReady = new Promise<void>((resolve) => {
+        let logsReady = false;
+        let requestReady = false;
 
-            if (idToUse) {
-              updateAgentStatus(idToUse, log.status, log.message);
+        const checkBothReady = () => {
+          if (logsReady && requestReady) {
+            console.log('✅ Both Realtime subscriptions are active');
+            resolve();
+          }
+        };
 
-              if (log.status === 'error' || log.message?.toLowerCase().includes('erro')) {
-                console.error('❌ Error detected in agent log:', log);
+        logsChannel = supabase
+          .channel(`logs-${requestId}`)
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'agent_logs', filter: `request_id=eq.${requestId}` },
+            (payload) => {
+              console.log('🔄 Realtime Payload:', payload);
+              const log = payload.new;
 
+              const idToUse = log.agent_id || log.agent_name;
+              console.log('🎯 Agent ID to use:', idToUse);
+
+              if (idToUse) {
+                updateAgentStatus(idToUse, log.status, log.message);
+
+                if (log.status === 'error' || log.message?.toLowerCase().includes('erro')) {
+                  console.error('❌ Error detected in agent log:', log);
+
+                  if (workflowTimeoutId) {
+                    clearTimeout(workflowTimeoutId);
+                    setWorkflowTimeoutId(null);
+                  }
+
+                  setIsLoading(false);
+
+                  setTimeout(() => {
+                    setMessages(prev => {
+                      const lastMessage = prev[prev.length - 1];
+                      if (lastMessage?.role !== 'assistant' || !lastMessage.content.includes('❌')) {
+                        return [...prev, {
+                          id: Date.now().toString(),
+                          role: 'assistant',
+                          content: `❌ **${t.errorMessage}**: ${log.message || t.errorMessage}`,
+                          timestamp: new Date()
+                        }];
+                      }
+                      return prev;
+                    });
+                  }, 1000);
+
+                  supabase.removeChannel(logsChannel);
+                  supabase.removeChannel(requestChannel);
+                }
+              }
+            }
+          )
+          .subscribe((status) => {
+            console.log('📡 Logs Subscription Status:', status);
+            if (status === 'SUBSCRIBED') {
+              logsReady = true;
+              checkBothReady();
+            }
+          });
+
+        // 3. Subscribe to requests updates (Final Answer)
+        requestChannel = supabase
+          .channel(`req-${requestId}`)
+          .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'requests', filter: `id=eq.${requestId}` },
+            (payload) => {
+              const updatedRequest = payload.new;
+
+              if (updatedRequest.status === 'completed' && updatedRequest.final_response) {
+                if (workflowTimeoutId) {
+                  clearTimeout(workflowTimeoutId);
+                  setWorkflowTimeoutId(null);
+                }
+
+                setIsLoading(false);
+                setMessages(prev => [...prev, {
+                  id: Date.now().toString(),
+                  role: 'assistant',
+                  content: updatedRequest.final_response,
+                  timestamp: new Date()
+                }]);
+                setAgents(prev => prev.map(a => ({ ...a, status: 'completed', message: t.statusCompleted })));
+
+                supabase.removeChannel(logsChannel);
+                supabase.removeChannel(requestChannel);
+              }
+
+              if (updatedRequest.status === 'failed' || updatedRequest.status === 'error') {
                 if (workflowTimeoutId) {
                   clearTimeout(workflowTimeoutId);
                   setWorkflowTimeoutId(null);
@@ -113,89 +193,36 @@ function MainApp() {
 
                 setIsLoading(false);
 
-                setTimeout(() => {
-                  setMessages(prev => {
-                    const lastMessage = prev[prev.length - 1];
-                    if (lastMessage?.role !== 'assistant' || !lastMessage.content.includes('❌')) {
-                      return [...prev, {
-                        id: Date.now().toString(),
-                        role: 'assistant',
-                        content: `❌ **${t.errorMessage}**: ${log.message || t.errorMessage}`,
-                        timestamp: new Date()
-                      }];
-                    }
-                    return prev;
-                  });
-                }, 1000);
+                setAgents(prev => prev.map(a => {
+                  if (a.status === 'working' || a.status === 'info') {
+                    return { ...a, status: 'error', message: t.statusError };
+                  }
+                  return a;
+                }));
+
+                setMessages(prev => [...prev, {
+                  id: Date.now().toString(),
+                  role: 'assistant',
+                  content: `❌ **${t.errorMessage}**: ${updatedRequest.error_message || t.errorMessage}`,
+                  timestamp: new Date()
+                }]);
 
                 supabase.removeChannel(logsChannel);
                 supabase.removeChannel(requestChannel);
               }
             }
-          }
-        )
-        .subscribe((status) => {
-          console.log('📡 Realtime Subscription Status:', status);
-        });
-
-      // 3. Subscribe to requests updates (Final Answer)
-      const requestChannel = supabase
-        .channel(`req-${requestId}`)
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'requests', filter: `id=eq.${requestId}` },
-          (payload) => {
-            const updatedRequest = payload.new;
-
-            if (updatedRequest.status === 'completed' && updatedRequest.final_response) {
-              if (workflowTimeoutId) {
-                clearTimeout(workflowTimeoutId);
-                setWorkflowTimeoutId(null);
-              }
-
-              setIsLoading(false);
-              setMessages(prev => [...prev, {
-                id: Date.now().toString(),
-                role: 'assistant',
-                content: updatedRequest.final_response,
-                timestamp: new Date()
-              }]);
-              setAgents(prev => prev.map(a => ({ ...a, status: 'completed', message: t.statusCompleted })));
-
-              supabase.removeChannel(logsChannel);
-              supabase.removeChannel(requestChannel);
+          )
+          .subscribe((status) => {
+            console.log('📡 Request Subscription Status:', status);
+            if (status === 'SUBSCRIBED') {
+              requestReady = true;
+              checkBothReady();
             }
+          });
+      });
 
-            if (updatedRequest.status === 'failed' || updatedRequest.status === 'error') {
-              if (workflowTimeoutId) {
-                clearTimeout(workflowTimeoutId);
-                setWorkflowTimeoutId(null);
-              }
-
-              setIsLoading(false);
-
-              setAgents(prev => prev.map(a => {
-                if (a.status === 'working' || a.status === 'info') {
-                  return { ...a, status: 'error', message: t.statusError };
-                }
-                return a;
-              }));
-
-              setMessages(prev => [...prev, {
-                id: Date.now().toString(),
-                role: 'assistant',
-                content: `❌ **${t.errorMessage}**: ${updatedRequest.error_message || t.errorMessage}`,
-                timestamp: new Date()
-              }]);
-
-              supabase.removeChannel(logsChannel);
-              supabase.removeChannel(requestChannel);
-            }
-          }
-        )
-        .subscribe();
-
-      // 4. Trigger n8n Webhook
+      // 4. Wait for subscriptions to be ready, then trigger n8n Webhook
+      await subscriptionsReady;
       const n8nUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
       console.log('Attempting to call n8n webhook:', n8nUrl);
 
