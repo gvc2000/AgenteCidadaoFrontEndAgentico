@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n';
 import { Plus, Edit2, Trash2, X, User } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface UserData {
     id: string;

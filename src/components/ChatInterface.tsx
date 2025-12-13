@@ -17,7 +17,7 @@ interface ChatInterfaceProps {
     isLoading: boolean;
     inputValue?: string;
     onInputChange?: (value: string) => void;
-    inputRef?: React.RefObject<HTMLInputElement>;
+    inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({

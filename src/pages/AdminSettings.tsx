@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n';
 import { Shield, Globe, Check } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface SystemSettings {
     accessRestricted: boolean;
@@ -47,13 +46,6 @@ export const AdminSettings: React.FC = () => {
         } finally {
             setIsSaving(false);
         }
-    };
-
-    const toggleAccessRestriction = () => {
-        setSettings(prev => ({
-            ...prev,
-            accessRestricted: !prev.accessRestricted,
-        }));
     };
 
     return (

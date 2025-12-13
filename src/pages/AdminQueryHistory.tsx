@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, MessageSquare, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useTranslation } from '../i18n';
 
 interface QueryLog {
     id: string;
@@ -14,7 +13,6 @@ interface QueryLog {
 }
 
 export const AdminQueryHistory: React.FC = () => {
-    const { t } = useTranslation();
     const [queries, setQueries] = useState<QueryLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
