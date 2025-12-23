@@ -223,6 +223,24 @@ function MainApp() {
 
       // 4. Wait for subscriptions to be ready, then trigger n8n Webhook
       await subscriptionsReady;
+
+      // 4.1 Fetch existing logs that may have arrived before subscription was ready
+      const { data: existingLogs } = await supabase
+        .from('agent_logs')
+        .select('*')
+        .eq('request_id', requestId)
+        .order('created_at', { ascending: true });
+
+      if (existingLogs && existingLogs.length > 0) {
+        console.log('📋 Processando logs existentes:', existingLogs.length);
+        existingLogs.forEach(log => {
+          const idToUse = log.agent_id || log.agent_name;
+          if (idToUse) {
+            updateAgentStatus(idToUse, log.status, log.message);
+          }
+        });
+      }
+
       const n8nUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
       console.log('Attempting to call n8n webhook:', n8nUrl);
 
@@ -278,12 +296,29 @@ function MainApp() {
 
   const updateAgentStatus = (agentId: string, status: string, message: string) => {
     const agentMap: Record<string, string> = {
+      // Orquestrador
       'Orquestrador': 'orchestrator',
+      'orquestrador': 'orchestrator',
+      'orchestrator': 'orchestrator',
+      // Legislativo
       'Legislativo': 'legislative',
+      'legislativo': 'legislative',
+      'legislative': 'legislative',
+      // Político
       'Político': 'political',
       'Politico': 'political',
+      'político': 'political',
+      'politico': 'political',
+      'political': 'political',
+      // Fiscal
       'Fiscal': 'fiscal',
-      'Sintetizador': 'consolidator'
+      'fiscal': 'fiscal',
+      // Consolidador/Sintetizador
+      'Sintetizador': 'consolidator',
+      'sintetizador': 'consolidator',
+      'Consolidador': 'consolidator',
+      'consolidador': 'consolidator',
+      'consolidator': 'consolidator',
     };
 
     const normalizedId = agentMap[agentId] || agentId.toLowerCase();
