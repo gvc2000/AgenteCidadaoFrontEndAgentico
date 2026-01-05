@@ -617,7 +617,7 @@
     },
     {
       "parameters": {
-        "model": "anthropic/claude-3.5-haiku",
+        "model": "deepseek/deepseek-chat-v3-0324",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -637,7 +637,7 @@
     },
     {
       "parameters": {
-        "model": "anthropic/claude-3.5-haiku",
+        "model": "deepseek/deepseek-chat-v3-0324",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -748,7 +748,7 @@
     },
     {
       "parameters": {
-        "model": "anthropic/claude-3.5-haiku",
+        "model": "deepseek/deepseek-chat-v3-0324",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -1148,7 +1148,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "7801376f-eb00-49bd-8e87-42db45c3e79a",
+  "versionId": "5817613f-7518-46aa-bab4-96ce1fd4a363",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "47c0851f3c62960484133b2e05ab8fb867cdf9e457bce7861d8db6cc8982ffba"
