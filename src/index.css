@@ -296,6 +296,39 @@ body {
   gap: 1rem;
 }
 
+/* New Conversation Button */
+.new-conversation-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--branco);
+  border: 2px solid var(--verde-primario);
+  color: var(--verde-primario);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.new-conversation-btn:hover {
+  background: var(--verde-primario);
+  color: var(--branco);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.new-conversation-btn:hover svg {
+  animation: spinOnce 0.5s ease-in-out;
+}
+
+@keyframes spinOnce {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ===== FOOTER ===== */
 .footer {
   background: var(--verde-escuro);

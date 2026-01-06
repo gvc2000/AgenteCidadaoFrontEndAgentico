@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Shield, Bot } from 'lucide-react';
+import { Shield, Bot, RefreshCw } from 'lucide-react';
 import { ChatInterface } from './components/ChatInterface';
 import { AgentStatus, type AgentState } from './components/AgentStatus';
 import { SidebarExamples } from './components/SidebarExamples';
@@ -8,8 +8,12 @@ import { SidebarDataSources } from './components/SidebarDataSources';
 import { LanguageSelector } from './components/LanguageSelector';
 import { LanguageProvider, useTranslation } from './i18n';
 import { supabase } from './lib/supabase';
+import { sessionManager } from './lib/sessionManager';
 
 import { AdminPage } from './pages/Admin';
+
+// Feature flag para memória conversacional
+const MEMORY_ENABLED = import.meta.env.VITE_ENABLE_CONVERSATION_MEMORY === 'true';
 
 function MainApp() {
   const { t } = useTranslation();
@@ -25,18 +29,75 @@ function MainApp() {
     { id: 'consolidator', name: 'Consolidador', status: 'idle', message: '' },
   ]);
 
-  // Global timeout for entire workflow (2 minutes)
-  const [workflowTimeoutId, setWorkflowTimeoutId] = useState<number | null>(null);
+  // Global timeout for entire workflow (6 minutes) - using ref to avoid stale closure
+  const workflowTimeoutRef = useRef<number | null>(null);
+
+  // Memória conversacional
+  const [conversationId, setConversationId] = useState<string | null>(null);
+
+  // Inicializar conversa quando memória está habilitada
+  useEffect(() => {
+    if (!MEMORY_ENABLED) return;
+
+    const initConversation = async () => {
+      try {
+        console.log('🧠 Inicializando memória conversacional...');
+        const convId = await sessionManager.getOrCreateConversation(supabase);
+        setConversationId(convId);
+        console.log('✅ Conversa inicializada:', convId);
+
+        // Carregar histórico existente
+        const history = await sessionManager.getConversationHistory(supabase, convId);
+        if (history.length > 0) {
+          console.log('📜 Carregando histórico:', history.length, 'mensagens');
+          setMessages(history.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: sessionManager.cleanResponseContent(msg.content),
+            timestamp: new Date(msg.created_at)
+          })));
+        }
+      } catch (error) {
+        console.error('❌ Erro ao inicializar conversa:', error);
+      }
+    };
+
+    initConversation();
+  }, []);
 
   const handleExampleClick = (question: string) => {
     setInputValue(question);
     inputRef.current?.focus();
   };
 
+  // Função para iniciar nova conversa
+  const handleNewConversation = async () => {
+    // Limpar sessão no localStorage
+    sessionManager.clearSession();
+
+    // Limpar estado local
+    setMessages([]);
+    setConversationId(null);
+    setInputValue('');
+    setAgents(prev => prev.map(a => ({ ...a, status: 'idle', message: '', startTime: undefined })));
+
+    // Criar nova conversa se memória estiver habilitada
+    if (MEMORY_ENABLED) {
+      try {
+        console.log('🆕 Iniciando nova conversa...');
+        const newConvId = await sessionManager.getOrCreateConversation(supabase);
+        setConversationId(newConvId);
+        console.log('✅ Nova conversa criada:', newConvId);
+      } catch (error) {
+        console.error('❌ Erro ao criar nova conversa:', error);
+      }
+    }
+  };
+
   const handleSendMessage = async (content: string) => {
     // Clear any existing timeout
-    if (workflowTimeoutId) {
-      clearTimeout(workflowTimeoutId);
+    if (workflowTimeoutRef.current) {
+      clearTimeout(workflowTimeoutRef.current);
     }
 
     // Add user message
@@ -48,10 +109,27 @@ function MainApp() {
     setAgents(prev => prev.map(a => ({ ...a, status: 'idle', message: '', startTime: undefined })));
 
     try {
+      // Construir contexto se memória estiver habilitada
+      let context = {};
+
+      if (MEMORY_ENABLED && conversationId) {
+        console.log('🧠 Memória ativada - salvando mensagem do usuário...');
+        await sessionManager.saveMessage(supabase, conversationId, 'user', content);
+
+        const history = await sessionManager.getConversationHistory(supabase, conversationId, 10);
+        context = sessionManager.buildContext(history);
+        console.log('📋 Contexto construído:', context);
+      }
+
       // 1. Create request in Supabase
       const { data, error } = await supabase
         .from('requests')
-        .insert([{ user_query: content, status: 'pending' }])
+        .insert([{
+          user_query: content,
+          status: 'pending',
+          conversation_id: MEMORY_ENABLED ? conversationId : null,
+          context: context
+        }])
         .select()
         .single();
 
@@ -85,7 +163,7 @@ function MainApp() {
         supabase.removeChannel(requestChannel);
       }, 360000);
 
-      setWorkflowTimeoutId(timeoutId);
+      workflowTimeoutRef.current = timeoutId;
 
       // 2. Subscribe to agent_logs (Realtime) - Declare channels first
       let logsChannel: ReturnType<typeof supabase.channel>;
@@ -121,9 +199,9 @@ function MainApp() {
                 if (log.status === 'error' || log.message?.toLowerCase().includes('erro')) {
                   console.error('❌ Error detected in agent log:', log);
 
-                  if (workflowTimeoutId) {
-                    clearTimeout(workflowTimeoutId);
-                    setWorkflowTimeoutId(null);
+                  if (workflowTimeoutRef.current) {
+                    clearTimeout(workflowTimeoutRef.current);
+                    workflowTimeoutRef.current = null;
                   }
 
                   setIsLoading(false);
@@ -163,20 +241,41 @@ function MainApp() {
           .on(
             'postgres_changes',
             { event: 'UPDATE', schema: 'public', table: 'requests', filter: `id=eq.${requestId}` },
-            (payload) => {
+            async (payload) => {
               const updatedRequest = payload.new;
 
               if (updatedRequest.status === 'completed' && updatedRequest.final_response) {
-                if (workflowTimeoutId) {
-                  clearTimeout(workflowTimeoutId);
-                  setWorkflowTimeoutId(null);
+                if (workflowTimeoutRef.current) {
+                  clearTimeout(workflowTimeoutRef.current);
+                  workflowTimeoutRef.current = null;
                 }
 
                 setIsLoading(false);
+
+                // Processar resposta (extrair entidades e limpar)
+                const rawResponse = updatedRequest.final_response;
+                console.log('📨 Resposta RAW (primeiros 500 chars):', rawResponse?.substring(0, 500));
+                console.log('🔍 Contém bloco ENTITIES?:', rawResponse?.includes('<!-- ENTITIES'));
+                const cleanResponse = sessionManager.cleanResponseContent(rawResponse);
+
+                // Salvar resposta do assistente com entidades extraídas
+                if (MEMORY_ENABLED && conversationId) {
+                  const entities = sessionManager.extractEntitiesFromResponse(rawResponse);
+                  console.log('🏷️ Entidades extraídas:', entities);
+                  await sessionManager.saveMessage(
+                    supabase,
+                    conversationId,
+                    'assistant',
+                    rawResponse,
+                    entities,
+                    requestId
+                  );
+                }
+
                 setMessages(prev => [...prev, {
                   id: Date.now().toString(),
                   role: 'assistant',
-                  content: updatedRequest.final_response,
+                  content: cleanResponse,
                   timestamp: new Date()
                 }]);
                 setAgents(prev => prev.map(a => ({ ...a, status: 'completed', message: t.statusCompleted })));
@@ -186,9 +285,9 @@ function MainApp() {
               }
 
               if (updatedRequest.status === 'failed' || updatedRequest.status === 'error') {
-                if (workflowTimeoutId) {
-                  clearTimeout(workflowTimeoutId);
-                  setWorkflowTimeoutId(null);
+                if (workflowTimeoutRef.current) {
+                  clearTimeout(workflowTimeoutRef.current);
+                  workflowTimeoutRef.current = null;
                 }
 
                 setIsLoading(false);
@@ -254,7 +353,9 @@ function MainApp() {
             body: JSON.stringify({
               record: {
                 id: requestId,
-                content: content
+                content: content,
+                conversation_id: MEMORY_ENABLED ? conversationId : null,
+                context: context
               }
             }),
           });
@@ -364,6 +465,14 @@ function MainApp() {
           </div>
 
           <div className="header-actions">
+            <button
+              onClick={handleNewConversation}
+              className="new-conversation-btn"
+              title={t.newConversation}
+            >
+              <RefreshCw size={16} />
+              <span>{t.newConversation}</span>
+            </button>
             <LanguageSelector />
           </div>
         </div>

@@ -17,6 +17,7 @@ export interface Translations {
   navSettings: string;
   navUsers: string;
   navLogout: string;
+  newConversation: string;
 
   // Chat
   chatTitle: string;
@@ -113,6 +114,7 @@ export const translations: Record<Language, Translations> = {
     navSettings: 'Configurações',
     navUsers: 'Usuários',
     navLogout: 'Sair',
+    newConversation: 'Nova Conversa',
 
     // Chat
     chatTitle: 'Faça sua consulta aos Dados Abertos',
@@ -214,6 +216,7 @@ export const translations: Record<Language, Translations> = {
     navSettings: 'Configuración',
     navUsers: 'Usuarios',
     navLogout: 'Salir',
+    newConversation: 'Nueva Conversación',
 
     // Chat
     chatTitle: 'Haga su consulta a los Datos Abiertos',
