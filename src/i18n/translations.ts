@@ -138,11 +138,11 @@ export const translations: Record<Language, Translations> = {
 
     // Example questions
     examples: [
-      'Quais deputados representam o Amazonas?',
-      'Liste as PECs apresentadas em 2024',
-      'Existem projetos de lei sobre inteligência artificial?',
-      'Quantos deputados tem o Rio de Janeiro?',
-      'Mostre as proposições sobre educação de 2025'
+      'Quais foram as últimas votações na Câmara?',
+      'Quais proposições sobre inteligência artificial estão em tramitação?',
+      'Analise os discursos do deputado Fulano de tal.',
+      'Quais os maiores partidos políticos na Câmara atualmente?',
+      'Quanto gastaram os deputados do Sergipe no último mês?'
     ],
 
     // Agents
@@ -240,11 +240,11 @@ export const translations: Record<Language, Translations> = {
 
     // Example questions
     examples: [
-      '¿Qué diputados representan Amazonas?',
-      'Liste las PECs presentadas en 2024',
-      '¿Existen proyectos de ley sobre inteligencia artificial?',
-      '¿Cuántos diputados tiene Río de Janeiro?',
-      'Muestre las proposiciones sobre educación de 2025'
+      '¿Cuáles fueron las últimas votaciones en la Cámara?',
+      '¿Qué proposiciones sobre inteligencia artificial están en trámite?',
+      'Analice los discursos del diputado Fulano de tal.',
+      '¿Cuáles son los mayores partidos políticos en la Cámara actualmente?',
+      '¿Cuánto gastaron los diputados de Sergipe el último mes?'
     ],
 
     // Agents
