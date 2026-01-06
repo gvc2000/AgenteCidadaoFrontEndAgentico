@@ -1,0 +1,4 @@
+| ?column?                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CREATE TABLE agent_logs (created_at timestamp with time zone, request_id uuid, details jsonb, agent_name text, message text, status text, id uuid, agent_id text);                          |
+| CREATE TABLE requests (final_response text, id uuid, created_at timestamp with time zone, metadata jsonb, updated_at timestamp with time zone, content text, user_query text, status text); |

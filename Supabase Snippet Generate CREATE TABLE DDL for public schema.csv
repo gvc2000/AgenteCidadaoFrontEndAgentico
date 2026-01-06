@@ -1,0 +1,17 @@
+table_name,column_name,data_type,is_nullable
+agent_logs,id,uuid,NO
+agent_logs,created_at,timestamp with time zone,YES
+agent_logs,request_id,uuid,YES
+agent_logs,agent_name,text,NO
+agent_logs,message,text,NO
+agent_logs,status,text,YES
+agent_logs,details,jsonb,YES
+agent_logs,agent_id,text,YES
+requests,id,uuid,NO
+requests,created_at,timestamp with time zone,YES
+requests,user_query,text,NO
+requests,status,text,YES
+requests,final_response,text,YES
+requests,metadata,jsonb,YES
+requests,content,text,YES
+requests,updated_at,timestamp with time zone,YES
