@@ -142,7 +142,7 @@ export const translations: Record<Language, Translations> = {
       'Quais proposições sobre inteligência artificial estão em tramitação?',
       'Analise os discursos do deputado Fulano de tal.',
       'Quais os maiores partidos políticos na Câmara atualmente?',
-      'Quanto gastaram os deputados do Sergipe no último mês?'
+      'Quanto gastou o deputado X no último mês de sua cota parlamentar?'
     ],
 
     // Agents
