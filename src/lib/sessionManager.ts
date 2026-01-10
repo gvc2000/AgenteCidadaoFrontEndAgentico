@@ -222,11 +222,15 @@ export class SessionManager {
         const entities: Entity[] = [];
 
         // Procurar bloco JSON oculto gerado pelo LLM
-        const entityMatch = response.match(/<!-- ENTITIES\n([\s\S]*?)\n-->/);
+        // Suporta ambos os formatos:
+        // 1. <!-- ENTITIES\n{...}\n-->  (com quebras de linha)
+        // 2. <!-- ENTITIES {...} -->    (tudo em uma linha)
+        const entityMatch = response.match(/<!-- ENTITIES\s*([\s\S]*?)\s*-->/);
 
         if (entityMatch) {
             try {
-                const parsed = JSON.parse(entityMatch[1]);
+                const jsonContent = entityMatch[1].trim();
+                const parsed = JSON.parse(jsonContent);
 
                 if (parsed.deputados && Array.isArray(parsed.deputados)) {
                     entities.push(...parsed.deputados.map((d: { nome?: string; name?: string; id?: number }) => ({
@@ -266,7 +270,8 @@ export class SessionManager {
 
     cleanResponseContent(response: string): string {
         // Remove o bloco de entidades antes de exibir ao usuário
-        return response.replace(/<!-- ENTITIES\n[\s\S]*?\n-->/g, '').trim();
+        // Suporta ambos os formatos (com e sem quebras de linha)
+        return response.replace(/<!-- ENTITIES\s*[\s\S]*?\s*-->/g, '').trim();
     }
 }
 
