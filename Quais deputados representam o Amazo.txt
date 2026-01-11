@@ -1,0 +1,28 @@
+Quais deputados representam o Amazonas?	Quem é o presidente da Câmara?	Mostra capacidade de dados atuais da Mesa Diretora
+2	Liste as PECs apresentadas em 2024	Quais foram as últimas votações na Câmara?	Demonstra dados em tempo real de votações
+3	Existem projetos de lei sobre inteligência artificial?	Quais proposições sobre inteligência artificial estão em tramitação?	Mais específico, retorno melhor
+4	Quantos deputados tem o Rio de Janeiro?	Qual o partido com mais deputados atualmente?	Interessante análise partidária
+5	Mostre as proposições sobre educação de 2025	Quais deputadas mulheres existem na Câmara?	Análise de diversidade
+✨ Alternativas interessantes:
+"Quanto gastaram os deputados de SP no último mês?" (Fiscal)
+"Quais comissões existem na Câmara?" (Estrutura)
+
+
+
+
+Quais foram as últimas votações na Câmara?
+Quais proposições sobre inteligência artificial estão em tramitação?
+Analise os discursos do deputado Fulano de tal.
+Quais os maiores partidos políticos na Câmara atualmente?
+Quanto gastaram os deputados do Paraná no último mês?
+Quais comissões existem na Câmara?
+Quem faz parte da mesa diretora atualmente?
+
+Perguntas antigas
+
+ Exemplos de Perguntas
+Quais deputados representam o Amazonas?
+Liste as PECs apresentadas em 2024
+Existem projetos de lei sobre inteligência artificial?
+Quantos deputados tem o Rio de Janeiro?
+Mostre as proposições sobre educação de 2025

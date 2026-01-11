@@ -1,0 +1,4 @@
+"postgresql://postgres.jcrfrclxegganatpntgi:Ren%40to2006@db.jcrfrclxegganatpntgi.supabase.co:5432/postgres" --schema public -f supabase/schema_dump.sql
+
+
+pg_dump "postgresql://postgres.jcrfrclxegganatpntgi:Ren%40to2006@db.jcrfrclxegganatpntgi.supabase.co:5432/postgres" > backup_completo.sql

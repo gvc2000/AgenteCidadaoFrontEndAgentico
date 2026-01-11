@@ -1,5 +1,11 @@
 # 🏛️ Agente Cidadão - Sistema Multi-Agentes para Dados Legislativos
 
+[![Deploy Status](https://img.shields.io/badge/deploy-railway-blueviolet)](https://railway.app)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.2-61dafb)](https://react.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E)](https://supabase.com)
+
 Sistema completo de consulta inteligente aos dados da Câmara dos Deputados, utilizando arquitetura multi-agentes com especialistas em diferentes áreas legislativas.
 
 ## 📋 Sobre o Projeto
@@ -49,7 +55,7 @@ O sistema utiliza **4 agentes especializados** trabalhando em conjunto:
 - Garante coesão e clareza
 - Pode complementar informações via MCP
 
-**Para detalhes completos da arquitetura, consulte:** [multi_agent_architecture.md](multi_agent_architecture.md)
+**Para detalhes completos da arquitetura, consulte:** [multi_agent_architecture.md](docs/architecture/multi_agent_architecture.md)
 
 ---
 
@@ -63,15 +69,28 @@ O sistema utiliza **4 agentes especializados** trabalhando em conjunto:
 
 ## 📚 Documentação
 
-- [Arquitetura Multi-Agentes](multi_agent_architecture.md) - Detalhes técnicos completos do sistema n8n
-- [Especificação do Frontend](especificacao.md) - Requisitos e design do frontend
-- [Workflow n8n](Agente%20Cidadão%20-%20Multi-Agentes.json) - Configuração completa do workflow
+📋 **[Ver Índice Completo da Documentação](DOCUMENTATION_SUMMARY.md)**
+
+### Documentação Principal
+
+- [Arquitetura Multi-Agentes](docs/architecture/multi_agent_architecture.md) - Detalhes técnicos completos do sistema n8n
+- [Especificação do Frontend](docs/architecture/especificacao.md) - Requisitos e design do frontend
+- [Workflow n8n](docs/workflows/Agente%20Cidadão%20-%20Multi-Agentes.json) - Configuração completa do workflow
+- [API Documentation](docs/architecture/API_DOCUMENTATION.md) - Integração com APIs e fluxo de dados
+
+### Guias
+
+- [Deploy Guide](docs/guides/DEPLOY.md) - Guia completo de deploy no Railway
+- [Contributing](docs/contributing/CONTRIBUTING.md) - Como contribuir com o projeto
+- [Security Policy](docs/contributing/SECURITY.md) - Política de segurança e reporte de vulnerabilidades
+- [FAQ & Troubleshooting](docs/guides/FAQ_TROUBLESHOOTING.md) - Perguntas frequentes e solução de problemas
+- [Changelog](CHANGELOG.md) - Histórico de versões e mudanças
 
 ---
 
 ## 🚀 Deploy
 
-Para instruções detalhadas de deploy no Railway.com, consulte [DEPLOY.md](./DEPLOY.md)
+Para instruções detalhadas de deploy no Railway.com, consulte [DEPLOY.md](docs/guides/DEPLOY.md)
 
 ## 🏃‍♂️ Desenvolvimento Local
 
@@ -234,7 +253,7 @@ npm run build
 
 ## 📄 Licença
 
-Este projeto está sob licença a ser definida.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
@@ -246,14 +265,18 @@ Desenvolvido para democratizar o acesso a dados legislativos brasileiros.
 
 ## 🔮 Roadmap
 
-- [ ] Interface realtime com cards dos agentes
-- [ ] Suporte multilíngue (Português/Espanhol)
-- [ ] Sistema de autenticação e usuários
-- [ ] Dashboard administrativo
+- [x] Interface realtime com cards dos agentes
+- [x] Suporte multilíngue (Português/Espanhol)
+- [x] Sistema de autenticação e usuários
+- [x] Dashboard administrativo
+- [x] Memória conversacional
 - [ ] Cache de respostas frequentes
 - [ ] Métricas de uso e performance
 - [ ] Expansão para Senado Federal
 - [ ] Análises preditivas com histórico
+- [ ] Integração WhatsApp (via Evolution API)
+- [ ] API pública para desenvolvedores
+- [ ] Aplicativo mobile (React Native)
 
 ---
 

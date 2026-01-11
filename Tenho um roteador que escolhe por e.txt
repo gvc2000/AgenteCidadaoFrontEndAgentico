@@ -1,0 +1,45 @@
+Tenho um roteador que escolhe por exmplo executar um agente politico e um agente fiscal depois faço um merge das respostas deles. Tenho a possibilidade de ter varios agentes. Alguns são escolhidos e devem rodar em paralelo e depois faço um merge com a resposta deles.
+
+Hoje o n8n não executa ramos em paralelo de verdade dentro do mesmo workflow: quando o Router (ou qualquer nó) tem várias saídas, elas são processadas sequencialmente, mesmo que visualmente pareçam paralelas. Isso é exatamente o que outros usuários relatam quando tentam “rodar múltiplos threads ao mesmo tempo” ou “executar múltiplos caminhos em paralelo”. [Múltiplos caminhos; Vários threads]
+
+O que você quer conceitualmente é:
+
+    Escolher dinamicamente quais agentes (político, fiscal, etc.) vão rodar.
+    Rodar esses agentes “em paralelo”.
+    Fazer um Merge das respostas. [Merge node; Merging data]
+
+Como o paralelismo real não existe dentro de um único fluxo, há dois padrões possíveis, dependendo do quão “paralelo” você realmente precisa:
+1. “Paralelo lógico” simples (dentro do mesmo workflow)
+
+Se você só precisa rodar vários agentes e depois juntar as respostas, mas não se importa se internamente é sequencial, você pode:
+
+    Usar o Router (ou IF/Filter) para decidir quais agentes executar.
+    Conectar cada agente a um Merge antes do “finalizador” (por exemplo, um agente que consolida tudo). [Multi‑agente com Merge; Exemplo de uso do Merge]
+    Configurar o Merge em modo Append ou Combine (por posição, por campo, etc.), conforme o formato das respostas. [Merge parâmetros]
+
+Visualmente você terá vários ramos saindo do Router, cada um indo para um agente, e todos convergindo em um Merge. Funciona bem para o caso de “rodar vários agentes e juntar a resposta”, mesmo que a execução seja sequencial.
+2. Paralelismo real entre agentes (execuções separadas)
+
+Se você realmente precisa que os agentes rodem ao mesmo tempo (por exemplo, porque cada um é pesado e você quer usar vários workers), então precisa transformar cada agente em um sub‑workflow e dispará‑los de forma assíncrona:
+
+    Crie um workflow para cada tipo de agente (político, fiscal, etc.), com um Webhook Trigger ou um Execute Workflow dedicado.
+
+    No workflow “orquestrador”:
+        Decida, via Router/IF, quais agentes chamar.
+        Para paralelismo real, use:
+            HTTP Request → Webhook dos sub‑workflows, de forma assíncrona, e
+            Um padrão de Wait com callback para “esperar todos terminarem”. [Parallel sub‑workflows; Pattern for parallel sub‑workflow execution]
+        Ou use Execute Workflow com “Wait For Sub‑Workflow Completion” desmarcado, se você não precisa esperar todos para seguir. [Parallel Processing]
+
+    Quando todos os sub‑workflows responderem (via Webhook de retorno, por exemplo), você junta as respostas com um Merge no orquestrador. [Merging data]
+
+Esse padrão é o mesmo que a comunidade usa para “sub‑workflows em paralelo” e “multi‑agente com gatekeeper”. [Multi‑agente gatekeeper]
+
+Resumindo:
+
+    Não há como fazer o Router executar saídas em paralelo real dentro de um único workflow.
+    Para o seu caso de “vários agentes e depois Merge”, normalmente:
+        Use vários ramos + Merge se o paralelismo não precisa ser real.
+        Use sub‑workflows assíncronos + Wait/Callback + Merge se você precisa de paralelismo verdadeiro.
+
+Se você puder descrever o formato exato da resposta de cada agente (JSON de cada um), posso sugerir uma configuração concreta do Merge (Append, Combine por campo, etc.).

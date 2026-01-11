@@ -1,0 +1,9 @@
+c60172b3-76c3-4c78-af5a-2043efe9c0b8
+
+
+ #Atualizar workflow via API
+curl -X PUT \
+  https://n8n-agentecidadaoagentico-production.up.railway.app/api/v1/workflows/KfG18yoo9n7C0odE \
+  -H "X-N8N-API-KEY: c60172b3-76c3-4c78-af5a-2043efe9c0b8" \
+  -H "Content-Type: application/json" \
+  -d @"Agente Cidadão - Multi-Agentes.json"
