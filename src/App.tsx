@@ -32,6 +32,9 @@ function MainApp() {
   // Global timeout for entire workflow (6 minutes) - using ref to avoid stale closure
   const workflowTimeoutRef = useRef<number | null>(null);
 
+  // Polling interval ref for cleanup
+  const pollingIntervalRef = useRef<number | null>(null);
+
   // Memória conversacional
   const [conversationId, setConversationId] = useState<string | null>(null);
 
@@ -158,7 +161,8 @@ function MainApp() {
           timestamp: new Date()
         }]);
 
-        // Cleanup channels
+        // Cleanup channels and polling
+        if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
         supabase.removeChannel(logsChannel);
         supabase.removeChannel(requestChannel);
       }, 360000);
@@ -196,7 +200,10 @@ function MainApp() {
               if (idToUse) {
                 updateAgentStatus(idToUse, log.status, log.message);
 
-                if (log.status === 'error' || log.message?.toLowerCase().includes('erro')) {
+                if (log.status === 'error' ||
+                  log.message?.toLowerCase().includes('erro') ||
+                  log.message?.toLowerCase().includes('failed') ||
+                  log.message?.toLowerCase().includes('syntaxerror')) {
                   console.error('❌ Error detected in agent log:', log);
 
                   if (workflowTimeoutRef.current) {
@@ -221,6 +228,7 @@ function MainApp() {
                     });
                   }, 1000);
 
+                  if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
                   supabase.removeChannel(logsChannel);
                   supabase.removeChannel(requestChannel);
                 }
@@ -280,6 +288,8 @@ function MainApp() {
                 }]);
                 setAgents(prev => prev.map(a => ({ ...a, status: 'completed', message: t.statusCompleted })));
 
+                // Cleanup polling and channels
+                if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
                 supabase.removeChannel(logsChannel);
                 supabase.removeChannel(requestChannel);
               }
@@ -306,6 +316,8 @@ function MainApp() {
                   timestamp: new Date()
                 }]);
 
+                // Cleanup polling and channels
+                if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
                 supabase.removeChannel(logsChannel);
                 supabase.removeChannel(requestChannel);
               }
@@ -339,6 +351,33 @@ function MainApp() {
           }
         });
       }
+
+      // 4.2 Start polling for logs as backup for Realtime (fixes cold start issue)
+      const processedLogIds = new Set<string>(existingLogs?.map(l => l.id) || []);
+      pollingIntervalRef.current = window.setInterval(async () => {
+        try {
+          const { data: newLogs } = await supabase
+            .from('agent_logs')
+            .select('*')
+            .eq('request_id', requestId)
+            .order('created_at', { ascending: true });
+
+          if (newLogs) {
+            newLogs.forEach(log => {
+              if (!processedLogIds.has(log.id)) {
+                processedLogIds.add(log.id);
+                const idToUse = log.agent_id || log.agent_name;
+                if (idToUse) {
+                  console.log('🔄 Polling encontrou novo log:', idToUse, log.status);
+                  updateAgentStatus(idToUse, log.status, log.message);
+                }
+              }
+            });
+          }
+        } catch (err) {
+          console.warn('Polling error (non-critical):', err);
+        }
+      }, 2000); // Poll every 2 seconds
 
       const n8nUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
       console.log('Attempting to call n8n webhook:', n8nUrl);
